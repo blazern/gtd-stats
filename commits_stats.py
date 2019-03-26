@@ -10,7 +10,7 @@ from utils import check_call
 from utils import check_output
 
 def extract_commits_history(repo_path, start_date, end_date):
-  output = check_output('git -C {} log --after={} --until={} --format=format:"%H %aI %aN %s"'.format(repo_path, start_date, end_date),
+  output = check_output('git -C {} log --no-merges --after={} --until={} --format=format:"%H %aI %aN %s"'.format(repo_path, start_date, end_date),
                         print_cmd=False)
   commits_texts = output.split('\n')
   commits = []
