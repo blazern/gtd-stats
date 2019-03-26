@@ -11,8 +11,11 @@ from commits_stats import extract_commits_history
 from utils import check_call
 from utils import check_output
 
+def date_to_timestamp(date):
+  return time.mktime(date.timetuple())
+
 def date_str_to_timestamp(date_str):
-  return time.mktime(datetime.strptime(date_str, "%Y-%m-%d").timetuple())
+  return date_to_timestamp(datetime.strptime(date_str, "%Y-%m-%d"))
 
 def str_to_file(file_path, string):
   with open(file_path, "w") as text_file:
@@ -45,9 +48,9 @@ class Tests(unittest.TestCase):
     
     self.assertEqual(3, len(commits))
     
-    self.assertEqual(date_str_to_timestamp('2001-01-01'), commits[0].timestamp)
-    self.assertEqual(date_str_to_timestamp('2002-01-01'), commits[1].timestamp)
-    self.assertEqual(date_str_to_timestamp('2003-01-01'), commits[2].timestamp)
+    self.assertEqual(date_str_to_timestamp('2001-01-01'), date_to_timestamp(commits[0].date))
+    self.assertEqual(date_str_to_timestamp('2002-01-01'), date_to_timestamp(commits[1].date))
+    self.assertEqual(date_str_to_timestamp('2003-01-01'), date_to_timestamp(commits[2].date))
 
     self.assertEqual('init commit', commits[0].msg)
     self.assertEqual('commit2', commits[1].msg)
@@ -76,8 +79,8 @@ class Tests(unittest.TestCase):
     
     self.assertEqual(2, len(commits))
     
-    self.assertEqual(date_str_to_timestamp('2001-01-01'), commits[0].timestamp)
-    self.assertEqual(date_str_to_timestamp('2002-01-01'), commits[1].timestamp)
+    self.assertEqual(date_str_to_timestamp('2001-01-01'), date_to_timestamp(commits[0].date))
+    self.assertEqual(date_str_to_timestamp('2002-01-01'), date_to_timestamp(commits[1].date))
 
     self.assertEqual('init commit', commits[0].msg)
     self.assertEqual('commit2', commits[1].msg)
@@ -103,8 +106,8 @@ class Tests(unittest.TestCase):
     
     self.assertEqual(2, len(commits))
     
-    self.assertEqual(date_str_to_timestamp('2002-01-01'), commits[0].timestamp)
-    self.assertEqual(date_str_to_timestamp('2003-01-01'), commits[1].timestamp)
+    self.assertEqual(date_str_to_timestamp('2002-01-01'), date_to_timestamp(commits[0].date))
+    self.assertEqual(date_str_to_timestamp('2003-01-01'), date_to_timestamp(commits[1].date))
 
     self.assertEqual('commit2', commits[0].msg)
     self.assertEqual('last commit', commits[1].msg)

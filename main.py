@@ -30,7 +30,7 @@ def main(argv):
   commits = extract_commits_history(options.repo_path, start_date, end_date)
   commits = reversed(commits)
   for commit in commits:
-    date_str = datetime.fromtimestamp(commit.timestamp).strftime('%Y/%m/%d')
+    date_str = commit.date.strftime('%Y/%m/%d')
     print('{};1;{}'.format(date_str, commit.author))
 
 if __name__ == '__main__':
