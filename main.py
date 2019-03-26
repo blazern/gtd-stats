@@ -26,8 +26,11 @@ def main(argv):
 
   start_date = extract_date_from(options.start_date, '2000-01-01')
   end_date = extract_date_from(options.end_date, '2099-12-31')
+  authors = options.authors
+  if authors is None:
+    authors = []
 
-  commits = extract_commits_history(options.repo_path, start_date, end_date)
+  commits = extract_commits_history(options.repo_path, start_date, end_date, authors)
   commits = reversed(commits)
   for commit in commits:
     date_str = commit.date.strftime('%Y/%m/%d')

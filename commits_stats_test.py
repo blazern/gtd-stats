@@ -120,3 +120,31 @@ class Tests(unittest.TestCase):
     sha1s = list(reversed(sha1s))
     self.assertEqual(sha1s[1], commits[0].sha1)
     self.assertEqual(sha1s[2], commits[1].sha1)
+
+  def test_can_choose_authors(self):
+    repo_name = str(datetime.now().microsecond) + str(random())
+    repo_path = os.path.join('/tmp/', repo_name)
+    os.makedirs(repo_path)
+    make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
+    make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
+    make_commit(repo_path, '2003-01-01', 'name3 <email3@host.com>', 'last commit')
+
+    commits = extract_commits_history(repo_path, '2000-01-01', '2003-01-02',
+                                      authors = ['name1', 'name3'])
+
+    self.assertEqual(2, len(commits))
+
+    self.assertEqual(date_str_to_timestamp('2001-01-01'), date_to_timestamp(commits[0].date))
+    self.assertEqual(date_str_to_timestamp('2003-01-01'), date_to_timestamp(commits[1].date))
+
+    self.assertEqual('init commit', commits[0].msg)
+    self.assertEqual('last commit', commits[1].msg)
+
+    self.assertEqual('name1', commits[0].author)
+    self.assertEqual('name3', commits[1].author)
+
+    sha1s = check_output('git -C {} log --format=format:"%H"'.format(repo_path),
+                         print_cmd=False).split('\n')
+    sha1s = list(reversed(sha1s))
+    self.assertEqual(sha1s[0], commits[0].sha1)
+    self.assertEqual(sha1s[2], commits[1].sha1)
