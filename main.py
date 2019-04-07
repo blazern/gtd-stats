@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 
 import argparse
 import sys
@@ -7,6 +7,7 @@ import re
 from datetime import datetime
 
 from commits_stats import extract_commits_history
+from commits_stats import convert_commits_to_stats_entries
 
 def extract_date_from(date_str, default_value):
   if date_str is None:
@@ -31,10 +32,10 @@ def main(argv):
     authors = []
 
   commits = extract_commits_history(options.repo_path, start_date, end_date, authors)
-  commits = reversed(commits)
-  for commit in commits:
-    date_str = commit.date.strftime('%Y/%m/%d')
-    print('{};1;{}'.format(date_str, commit.author))
+  stats_entries = convert_commits_to_stats_entries(commits)
+  stats_entries = reversed(stats_entries)
+  for stats_entry in stats_entries:
+    print(str(stats_entry))
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))
