@@ -1,4 +1,5 @@
 import unittest
+import test_utils
 
 import os
 import time
@@ -26,9 +27,7 @@ def make_commit(repo_path, date, author, msg):
   # will do nothing
   check_call('git -C {} init'.format(repo_path), DEVNULL)
 
-  new_file_name = str(random())
-  new_file_content = str(random())
-  str_to_file(os.path.join(repo_path, new_file_name), new_file_content)
+  test_utils.make_file_and_write(repo_path, str(random()))
   check_call('git -C {} add -A'.format(repo_path),
              DEVNULL)
   check_call('GIT_AUTHOR_DATE="{0} 00:00" GIT_COMMITTER_DATE="{0} 00:00" '
@@ -37,9 +36,7 @@ def make_commit(repo_path, date, author, msg):
 
 class CommitStatsTests(unittest.TestCase):
   def test_can_get_full_commits_history(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
     make_commit(repo_path, '2003-01-01', 'name3 <email3@host.com>', 'last commit')
@@ -68,9 +65,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual(sha1s[2], commits[2].sha1)
 
   def test_can_get_commit_history_without_recent(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
     make_commit(repo_path, '2003-01-01', 'name3 <email3@host.com>', 'last commit')
@@ -95,9 +90,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual(sha1s[1], commits[1].sha1)
 
   def test_can_get_commit_history_without_older(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
     make_commit(repo_path, '2003-01-01', 'name3 <email3@host.com>', 'last commit')
@@ -122,9 +115,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual(sha1s[2], commits[1].sha1)
 
   def test_can_choose_authors(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
     make_commit(repo_path, '2003-01-01', 'name3 <email3@host.com>', 'last commit')
@@ -150,9 +141,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual(sha1s[2], commits[1].sha1)
 
   def test_convert_commits_to_stats_entries(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
     make_commit(repo_path, '2003-01-01', 'name3 <email3@host.com>', 'pre last commit')
@@ -168,9 +157,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual('01/01/2003;1;name3', str(stats_entries[2]))
 
   def test_convert_commits_to_stats_entries_with_aliases(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
     make_commit(repo_path, '2002-01-01', 'name3 <email3@host.com>', 'pre last commit')
@@ -186,9 +173,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual('01/01/2002;2;name2', str(stats_entries[1]))
 
   def test_authors_with_whitespaces_handled_properly(self):
-    repo_name = str(datetime.now().microsecond) + str(random())
-    repo_path = os.path.join('/tmp/', repo_name)
-    os.makedirs(repo_path)
+    repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'firstname secondname <email1@host.com>', 'init commit')
 
     commits = extract_commits_history(repo_path, '2000-01-01', '2003-01-02')

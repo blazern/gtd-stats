@@ -44,28 +44,53 @@ class StatsEntry:
 
   @staticmethod
   def collapse(entries):
-    # Collect entries by date
-    entries_mapped_by_date = {}
+    entries_dict = {}
     for entry in entries:
-      if entry.date not in entries_mapped_by_date:
-        entries_mapped_by_date[entry.date] = []
-      entries_mapped_by_date[entry.date].append(entry)
+      date_descr_pair = (entry.date, entry.description)
+      if date_descr_pair not in entries_dict:
+        entries_dict[date_descr_pair] = []
+      entries_dict[date_descr_pair].append(entry)
 
     result = []
-    for date, day_entries in entries_mapped_by_date.items():
-      # Collect (already collected by date) entries by description
-      day_entries_mapped_by_descr = {}
-      for day_entry in day_entries:
-        if day_entry.description not in day_entries_mapped_by_descr:
-           day_entries_mapped_by_descr[day_entry.description] = []
-        day_entries_mapped_by_descr[day_entry.description].append(day_entry)
-
-      # Collapse entries with same date and description
-      for description, descr_entries in day_entries_mapped_by_descr.items():
-        sum_value = 0
-        for descr_entry in descr_entries:
-          sum_value += descr_entry.value
-        result.append(StatsEntry(date, sum_value, description))
-
+    for date_descr_pair, same_date_descr_entries in entries_dict.items():
+      sum_value = 0
+      for entry in same_date_descr_entries:
+        sum_value += entry.value
+      result.append(StatsEntry(date_descr_pair[0], sum_value, date_descr_pair[1]))
     result = sorted(result, key=lambda entry: entry.date) 
     return result
+
+  # Passed entries must be collapsed
+  @staticmethod
+  def merge(entries1, entries2, prioritized):
+    if len(entries1) != len(StatsEntry.collapse(entries1)):
+      raise ValueError('First entries list is not collapsed: {}'.format(entries1))
+    if len(entries2) != len(StatsEntry.collapse(entries2)):
+      raise ValueError('Second entries list is not collapsed: {}'.format(entries1))
+
+    if entries1 is prioritized:
+      notprioritized = entries2
+    elif entries2 is prioritized:
+      notprioritized = entries1
+    else:
+      raise ValueError('One of the given lists must be prioritized')
+
+    merged_entries_dict = {}
+    for entry in prioritized:
+      date_descr_pair = (entry.date, entry.description)
+      # Note that we asserted in the beginning of the function
+      # that both lists are already collapsed.
+      if date_descr_pair in merged_entries_dict:
+        raise RuntimeError('Unexpectedly collapsing didn\t work: {}', prioritized)
+      merged_entries_dict[date_descr_pair] = entry
+
+    for entry in notprioritized:
+      date_descr_pair = (entry.date, entry.description)
+      if date_descr_pair not in merged_entries_dict:
+        merged_entries_dict[date_descr_pair] = entry
+
+    merged_entries = []
+    for entry in merged_entries_dict.values():
+      merged_entries.append(entry)
+    merged_entries = sorted(merged_entries, key=lambda entry: entry.date)
+    return merged_entries
