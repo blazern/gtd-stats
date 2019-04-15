@@ -55,7 +55,7 @@ def extract_full_authors_list(input_authors, aliases):
 
 def main(argv):
   parser = argparse.ArgumentParser(description='Produces commits history for given period')
-  parser.add_argument('--repo', required=True, help='Path to a git repo.')
+  parser.add_argument('--repos', required=True, help='Paths to git repos, separated by ":".')
   parser.add_argument('--authors', nargs='*', help='List of commits authors to process')
   parser.add_argument('--start-date', default='2000-01-01', help='Used for Git\'s "--until" param. Default is 2000-01-01.')
   parser.add_argument('--end-date', default='2099-12-31', help='Used for Git\'s "--after" param. Default is 2099-12-31.')
@@ -82,7 +82,10 @@ def main(argv):
   aliases = extract_author_aliases_from(options.author_aliases)
   authors = extract_full_authors_list(options.authors, aliases)
 
-  commits = extract_commits_history(options.repo, start_date, end_date, authors)
+  commits = []
+  repos = options.repos.split(':')
+  for repo in repos:
+    commits += extract_commits_history(repo, start_date, end_date, authors)
   stats_entries = convert_commits_to_stats_entries(commits, aliases)
   stats_entries = list(reversed(stats_entries))
   if options.extra_input_file is not None:
