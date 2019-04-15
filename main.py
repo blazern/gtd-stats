@@ -39,6 +39,20 @@ def extract_author_aliases_from(aliases_str):
   validate_commits_authors_aliases(authors_and_aliases)
   return authors_and_aliases
 
+def extract_full_authors_list(input_authors, aliases):
+  if input_authors is None:
+    return []
+  authors = list(input_authors)
+  for author, author_aliases in aliases.items():
+    if input_authors is not None and author not in input_authors:
+      raise ValueError('Author {} is present in --author-aliases but not in --authors'.format(author))
+    # If alias is not in the authors list, add it to the list
+    # so that commits of the alias would be extracted from the log, too.
+    for alias in author_aliases:
+      if alias not in authors:
+        authors.append(alias)
+  return authors
+
 def main(argv):
   parser = argparse.ArgumentParser(description='Produces commits history for given period')
   parser.add_argument('--repo', required=True, help='Path to a git repo.')
@@ -65,12 +79,10 @@ def main(argv):
 
   start_date = extract_date_from(options.start_date)
   end_date = extract_date_from(options.end_date)
-  authors = options.authors
-  if authors is None:
-    authors = []
+  aliases = extract_author_aliases_from(options.author_aliases)
+  authors = extract_full_authors_list(options.authors, aliases)
 
   commits = extract_commits_history(options.repo, start_date, end_date, authors)
-  aliases = extract_author_aliases_from(options.author_aliases)
   stats_entries = convert_commits_to_stats_entries(commits, aliases)
   stats_entries = list(reversed(stats_entries))
   if options.extra_input_file is not None:
