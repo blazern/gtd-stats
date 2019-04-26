@@ -2,7 +2,7 @@ import os
 import shutil
 from datetime import datetime
 
-from stats_entry import StatsEntry
+from core.stats_entry import StatsEntry
 
 def load_from(file_path):
   if not os.path.exists(file_path):

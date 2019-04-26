@@ -8,7 +8,7 @@ class MainTests(unittest.TestCase):
     self.assertEqual(2, len(aliases))
     self.assertTrue('author1' in aliases)
     self.assertTrue('author2' in aliases)
-    
+
     self.assertEqual(2, len(aliases['author1']))
     self.assertTrue('alias1' in aliases['author1'])
     self.assertTrue('alias2' in aliases['author1'])

@@ -6,11 +6,11 @@ import re
 
 from datetime import datetime
 
-import stats_file_utils
-from stats_entry import StatsEntry
-from commits_stats import extract_commits_history
-from commits_stats import convert_commits_to_stats_entries
-from commits_stats import validate_commits_authors_aliases
+import core.stats_file_utils
+from core.stats_entry import StatsEntry
+from core.commits_stats import extract_commits_history
+from core.commits_stats import convert_commits_to_stats_entries
+from core.commits_stats import validate_commits_authors_aliases
 
 def extract_date_from(date_str):
   date_pattern = re.compile('^\d\d\d\d-\d\d-\d\d$')
@@ -25,7 +25,7 @@ def extract_author_aliases_from(aliases_str):
   aliases_pattern = re.compile(aliases_pattern_str)
   if not aliases_pattern.match(aliases_str):
     raise ValueError('Pattern {} is not match by aliases {}'.format(aliases_pattern_str, aliases_str))
-  
+
   aliases_pairs = aliases_str.split(';')
   authors_and_aliases = {}
   for pair in aliases_pairs:

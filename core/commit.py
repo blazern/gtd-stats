@@ -1,4 +1,4 @@
-from stats_entry import StatsEntry
+from core.stats_entry import StatsEntry
 
 class Commit:
   def __init__(self, sha1, date, author, msg):

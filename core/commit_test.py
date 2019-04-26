@@ -2,8 +2,8 @@ import unittest
 
 from datetime import datetime
 
-from commit import Commit
-from stats_entry import StatsEntry
+from core.commit import Commit
+from core.stats_entry import StatsEntry
 
 class CommitTests(unittest.TestCase):
   def test_can_convert_into_stats_entry(self):

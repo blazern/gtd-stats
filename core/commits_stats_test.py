@@ -1,5 +1,5 @@
 import unittest
-import test_utils
+import core.test_utils as test_utils
 
 import os
 import time
@@ -7,10 +7,10 @@ from subprocess import DEVNULL
 from datetime import datetime
 from random import random
 
-from commits_stats import extract_commits_history
-from commits_stats import convert_commits_to_stats_entries
-from utils import check_call
-from utils import check_output
+from core.commits_stats import extract_commits_history
+from core.commits_stats import convert_commits_to_stats_entries
+from core.utils import check_call
+from core.utils import check_output
 
 def date_to_timestamp(date):
   return time.mktime(date.timetuple())

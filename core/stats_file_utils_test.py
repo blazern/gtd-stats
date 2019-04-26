@@ -1,10 +1,10 @@
 import unittest
-import test_utils
+from core import test_utils
 
 import os
 
-import stats_file_utils
-from stats_entry import StatsEntry
+from core import stats_file_utils
+from core.stats_entry import StatsEntry
 
 class StatsFileUtilsTests(unittest.TestCase):
   def test_can_load_stats_from_file(self):

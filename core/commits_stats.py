@@ -4,11 +4,11 @@ import subprocess
 import re
 
 from datetime import datetime
-from utils import check_call
-from utils import check_output
 
-from commit import Commit
-from stats_entry import StatsEntry
+from core.utils import check_call
+from core.utils import check_output
+from core.commit import Commit
+from core.stats_entry import StatsEntry
 
 def extract_commits_history(repo_path, start_date, end_date, authors = []):
   output = check_output('git -C {} log --no-merges --after={} --until={} --format=format:"%H;%aI;%aN;%s"'.format(repo_path, start_date, end_date),
