@@ -1,6 +1,6 @@
 import unittest
 
-from main import extract_author_aliases_from
+from commits_to_cvs import extract_author_aliases_from
 
 class MainTests(unittest.TestCase):
   def test_extracts_authors_aliases(self):
