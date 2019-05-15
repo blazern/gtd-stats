@@ -1,4 +1,6 @@
+from core.stat_column_type import StatColumnType
 from core.stats_entry import StatsEntry
+from core.typed_stats_entry import TypedStatsEntry
 
 class Commit:
   def __init__(self, sha1, date, author, msg):
@@ -8,4 +10,5 @@ class Commit:
     self.msg = msg
 
   def to_stats_entry(self):
-    return StatsEntry(date=self.date, value=1, description=self.author)
+    return TypedStatsEntry.from_stats([StatColumnType.DATE, StatColumnType.VALUE, StatColumnType.ID],
+                                      [self.date,     1,              self.author])

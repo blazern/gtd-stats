@@ -9,6 +9,7 @@ from core.utils import check_call
 from core.utils import check_output
 from core.commit import Commit
 from core.stats_entry import StatsEntry
+from core.stats_cluster import StatsCluster
 
 def extract_commits_history(repo_path, start_date, end_date, authors = []):
   output = check_output('git -C {} log --no-merges --after={} --until={} --format=format:"%H;%aI;%aN;%s"'.format(repo_path, start_date, end_date),
@@ -58,7 +59,7 @@ def __reverse_authors_and_aliases(authors_and_aliases):
   return aliases_and_authors
 
 # Aliases dict should have next format: {'author1':['alias1','alias2'], 'author2':['alias3']}
-def convert_commits_to_stats_entries(commits, aliases={}):
+def convert_commits_to_stats_cluster(commits, aliases={}):
   aliases_and_authors = __reverse_authors_and_aliases(aliases)
   entries = []
   for commit in commits:
@@ -68,4 +69,7 @@ def convert_commits_to_stats_entries(commits, aliases={}):
                       aliases_and_authors[commit.author],
                       commit.msg)
     entries.append(commit.to_stats_entry())
-  return StatsEntry.collapse(entries)
+
+  if len(entries) == 0:
+    return None
+  return StatsCluster.from_typed_entries(entries).collapse()

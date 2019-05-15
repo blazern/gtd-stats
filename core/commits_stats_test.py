@@ -8,7 +8,7 @@ from datetime import datetime
 from random import random
 
 from core.commits_stats import extract_commits_history
-from core.commits_stats import convert_commits_to_stats_entries
+from core.commits_stats import convert_commits_to_stats_cluster
 from core.utils import check_call
 from core.utils import check_output
 
@@ -140,7 +140,7 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual(sha1s[0], commits[0].sha1)
     self.assertEqual(sha1s[2], commits[1].sha1)
 
-  def test_convert_commits_to_stats_entries(self):
+  def test_convert_commits_to_stats_cluster(self):
     repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
@@ -150,13 +150,13 @@ class CommitStatsTests(unittest.TestCase):
     commits = extract_commits_history(repo_path, '2000-01-01', '2003-01-02')
     self.assertEqual(4, len(commits))
 
-    stats_entries = convert_commits_to_stats_entries(commits)
-    self.assertEqual(3, len(stats_entries))
-    self.assertEqual('01/01/2001;2;name1', str(stats_entries[0]))
-    self.assertEqual('01/01/2002;1;name2', str(stats_entries[1]))
-    self.assertEqual('01/01/2003;1;name3', str(stats_entries[2]))
+    stats_cluster = convert_commits_to_stats_cluster(commits)
+    self.assertEqual(3, len(stats_cluster.entries()))
+    self.assertEqual('01/01/2003;1;name3', str(stats_cluster.entries()[0]))
+    self.assertEqual('01/01/2002;1;name2', str(stats_cluster.entries()[1]))
+    self.assertEqual('01/01/2001;2;name1', str(stats_cluster.entries()[2]))
 
-  def test_convert_commits_to_stats_entries_with_aliases(self):
+  def test_convert_commits_to_stats_cluster_with_aliases(self):
     repo_path = test_utils.make_tmp_dir()
     make_commit(repo_path, '2001-01-01', 'name1 <email1@host.com>', 'init commit')
     make_commit(repo_path, '2002-01-01', 'name2 <email2@host.com>', 'commit2')
@@ -167,10 +167,10 @@ class CommitStatsTests(unittest.TestCase):
     self.assertEqual(4, len(commits))
 
     aliases = {'name2':['name3']}
-    stats_entries = convert_commits_to_stats_entries(commits, aliases=aliases)
-    self.assertEqual(2, len(stats_entries))
-    self.assertEqual('01/01/2001;2;name1', str(stats_entries[0]))
-    self.assertEqual('01/01/2002;2;name2', str(stats_entries[1]))
+    stats_cluster = convert_commits_to_stats_cluster(commits, aliases=aliases)
+    self.assertEqual(2, len(stats_cluster.entries()))
+    self.assertEqual('01/01/2002;2;name2', str(stats_cluster.entries()[0]))
+    self.assertEqual('01/01/2001;2;name1', str(stats_cluster.entries()[1]))
 
   def test_authors_with_whitespaces_handled_properly(self):
     repo_path = test_utils.make_tmp_dir()

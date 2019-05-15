@@ -4,6 +4,7 @@ from datetime import datetime
 
 from core.commit import Commit
 from core.stats_entry import StatsEntry
+from core.typed_stats_entry import TypedStatsEntry
 
 class CommitTests(unittest.TestCase):
   def test_can_convert_into_stats_entry(self):
@@ -14,7 +15,7 @@ class CommitTests(unittest.TestCase):
 
     stats_entry = commit.to_stats_entry()
 
-    self.assertTrue(isinstance(stats_entry, StatsEntry))
-    self.assertEqual(1, stats_entry.value) # 1 commit
-    self.assertEqual(commit.date, stats_entry.date)
-    self.assertEqual(commit.author, stats_entry.description)
+    self.assertTrue(isinstance(stats_entry, TypedStatsEntry))
+    self.assertEqual(1, stats_entry.value()) # 1 commit
+    self.assertEqual(commit.date, stats_entry.date())
+    self.assertEqual(commit.author, stats_entry.id())

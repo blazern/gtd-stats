@@ -3,6 +3,7 @@ import shutil
 from datetime import datetime
 
 from core.stats_entry import StatsEntry
+from core.stats_cluster import StatsCluster
 
 def load_from(file_path):
   if not os.path.exists(file_path):
@@ -11,13 +12,12 @@ def load_from(file_path):
   with open(file_path, 'r') as text_file:
     lines = text_file.readlines()
   lines = [line.strip() for line in lines]
+  lines = [line for line in lines if len(line) > 0]
+  text = '\n'.join(lines)
 
-  result = []
-  for line in lines:
-    if len(line) == 0:
-      continue
-    result.append(StatsEntry.from_str(line))
-  return result
+  if len(text) is 0:
+    return None
+  return StatsCluster.from_str(text)
 
 def __handle_backups_before_writing(file_path, backup_dir_path, backups_limit):
   if not os.path.exists(file_path) or backup_dir_path is None:
@@ -52,14 +52,12 @@ def __handle_backups_before_writing(file_path, backup_dir_path, backups_limit):
 # Writes given entries into the given file.
 # Doesn't remove already existing entries from the given file,
 # instead, uses StatsEntry.merge() to merge old entries and new.
-def write_into(file_path, stats_entries, backup_dir_path=None, backups_limit=None):
+def write_into(file_path, stats_cluster, backup_dir_path=None, backups_limit=None):
   __handle_backups_before_writing(file_path, backup_dir_path, backups_limit)
-  existing_entries = load_from(file_path)
-  stats_entries = StatsEntry.merge(stats_entries, existing_entries, prioritized=stats_entries)
-  entries_strs = []
-  for entry in stats_entries:
-    entries_strs.append(str(entry))
+  existing_cluster = load_from(file_path)
+  if existing_cluster is not None:
+    stats_cluster = stats_cluster.merge(existing_cluster, prioritized=stats_cluster)
   if not os.path.exists(os.path.dirname(file_path)):
     os.makedirs(os.path.dirname(file_path))
   with open(file_path, 'w') as text_file:
-    text_file.write(os.linesep.join(entries_strs))
+    text_file.write(str(stats_cluster))

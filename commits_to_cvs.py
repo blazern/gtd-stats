@@ -9,7 +9,7 @@ from datetime import datetime
 import core.stats_file_utils
 from core.stats_entry import StatsEntry
 from core.commits_stats import extract_commits_history
-from core.commits_stats import convert_commits_to_stats_entries
+from core.commits_stats import convert_commits_to_stats_cluster
 from core.commits_stats import validate_commits_authors_aliases
 
 def extract_date_from(date_str):
@@ -86,20 +86,19 @@ def main(argv):
   repos = options.repos.split(':')
   for repo in repos:
     commits += extract_commits_history(repo, start_date, end_date, authors)
-  stats_entries = convert_commits_to_stats_entries(commits, aliases)
-  stats_entries = list(reversed(stats_entries))
+  stats_cluster = convert_commits_to_stats_cluster(commits, aliases)
+
   if options.extra_input_file is not None:
-    file_stats = stats_file_utils.load_from(options.extra_input_file)
-    stats_entries = StatsEntry.merge(stats_entries, file_stats, prioritized=stats_entries)
+    file_stats_cluster = stats_file_utils.load_from(options.extra_input_file)
+    stats_cluster = stats_cluster.merge(file_stats_cluster, prioritized=stats_cluster)
 
   if options.output_file is not None:
     stats_file_utils.write_into(options.output_file,
-                                stats_entries,
+                                stats_cluster,
                                 options.backups_dir,
                                 options.backups_limit)
   else:
-    for stats_entry in stats_entries:
-      print(str(stats_entry))
+    print(str(stats_cluster))
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))
