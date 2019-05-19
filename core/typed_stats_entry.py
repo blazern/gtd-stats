@@ -81,3 +81,6 @@ class TypedStatsEntry:
       return float(self.not_typed.columns[indx])
     else:
       raise ValueError('Unexpected StatColumnType: {}'.format(stat_column_type))
+
+  def __str__(self):
+    return str(self.not_typed)
