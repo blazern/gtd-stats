@@ -48,6 +48,11 @@ class StatsCluster:
 
   @staticmethod
   def from_str(string):
+    lines = string.split('\n')
+    lines = [line.strip() for line in lines]
+    lines = [line for line in lines if len(line) > 0]
+    string = '\n'.join(lines)
+
     first_line_break = string.find('\n')
     if first_line_break >= 0:
       metadata_str = string[:first_line_break]
