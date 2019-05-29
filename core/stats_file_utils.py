@@ -10,10 +10,7 @@ def load_from(file_path):
     return []
 
   with open(file_path, 'r') as text_file:
-    lines = text_file.readlines()
-  lines = [line.strip() for line in lines]
-  lines = [line for line in lines if len(line) > 0]
-  text = '\n'.join(lines)
+    text = text_file.read()
 
   if len(text) is 0:
     return None

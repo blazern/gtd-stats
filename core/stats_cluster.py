@@ -6,7 +6,7 @@ from core.stat_column_type import StatColumnType
 def _StatsCluster__entries_to_typed_entries(metadata, stats_entries):
   result = []
   for entry in stats_entries:
-    result.append(TypedStatsEntry(entry, metadata))
+    result.append(TypedStatsEntry(entry, metadata.types()))
   return result
 
 class StatsCluster:
@@ -32,15 +32,7 @@ class StatsCluster:
     self._stats_entries = stats_entries
 
   @staticmethod
-  def from_typed_entries(typed_entries):
-    if len(typed_entries) <= 0:
-      raise ValueError('Can\'t work with no typed entries - nowhere to get metadata from')
-
-    metadata = typed_entries[0].metadata
-    for typed_entry in typed_entries:
-      if typed_entry.metadata != metadata:
-        raise ValueError('Metadata of at least 2 entries differs: {}, {}'.format(metadata, typed_entry.metadata))
-
+  def from_typed_entries(typed_entries, metadata):
     entries = []
     for typed_entry in typed_entries:
       entries.append(typed_entry.not_typed)
@@ -49,20 +41,22 @@ class StatsCluster:
   @staticmethod
   def from_str(string):
     lines = string.split('\n')
-    lines = [line.strip() for line in lines]
-    lines = [line for line in lines if len(line) > 0]
+    lines = [line for line in lines if len(line.strip()) > 0]
     string = '\n'.join(lines)
 
     first_line_break = string.find('\n')
     if first_line_break >= 0:
-      metadata_str = string[:first_line_break]
-      all_entries_str = string[first_line_break+1:]
+      metadata_start, metadata_end = StatsMetadata.find_str_position(string)
+      metadata_str = string[metadata_start:metadata_end]
+      all_entries_str = string[0:metadata_start]+string[metadata_end:]
     else:
       metadata_str = string
       all_entries_str = ''
 
-    entries = []
     entries_strs = all_entries_str.split('\n')
+    entries_strs = [entry.strip() for entry in entries_strs]
+    entries_strs = [entry for entry in entries_strs if len(entry) > 0]
+    entries = []
     for entry_str in entries_strs:
       entries.append(StatsEntry.from_str(entry_str))
     return StatsCluster(StatsMetadata.from_str(metadata_str), entries)
@@ -124,7 +118,7 @@ class StatsCluster:
           result_columns.append(same_date_id_entries[0].not_typed.columns[indx])
         else:
           raise ValueError('Unknown StatColumnType: {}'.format(stat_column_type))
-      result_typed_entries.append(TypedStatsEntry(StatsEntry(result_columns), self._metadata))
+      result_typed_entries.append(TypedStatsEntry(StatsEntry(result_columns), self._metadata.types()))
 
     result_entries = []
     for typed_entry in result_typed_entries:

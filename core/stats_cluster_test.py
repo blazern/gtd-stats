@@ -7,6 +7,7 @@ from core.stats_cluster import StatsCluster
 from core.stat_column_type import StatColumnType
 from core.stats_metadata import StatsMetadata
 from core.stats_entry import StatsEntry
+from core.chart_appearance import *
 
 class StatsClusterTests(unittest.TestCase):
   def test_from_string(self):
@@ -31,6 +32,82 @@ class StatsClusterTests(unittest.TestCase):
     cluster = StatsCluster(StatsMetadata.from_str('date;value;id;comment'),
                            [StatsEntry.from_str('13/05/2019;123;some_id;some comment')])
     self.assertEqual('date;value;id;comment\n13/05/2019;123;some_id;some comment', str(cluster))
+
+  def test_from_string_with_complext_metadata(self):
+    cluster_str = \
+'''
+28/05/2019;123;some_id321;some comment
+===
+- what: chart
+  type: moving-average
+  title: ma
+  offset: 20
+- what: chart
+  title: periodic
+  type: period
+  unit: days
+  unit-value: 7
+- what: format
+  value: date;value;id;comment
+===
+'''
+    cluster = StatsCluster.from_str(cluster_str)
+    stats = cluster.entries()
+    self.assertEqual(1, len(stats))
+    types = cluster.metadata().types()
+    self.assertEqual(4, len(types))
+
+    self.assertEqual(StatColumnType.DATE, types[0])
+    self.assertEqual(StatColumnType.VALUE, types[1])
+    self.assertEqual(StatColumnType.ID, types[2])
+    self.assertEqual(StatColumnType.COMMENT, types[3])
+
+    self.assertEqual('28/05/2019', stats[0].columns[0])
+    self.assertEqual('123', stats[0].columns[1])
+    self.assertEqual('some_id321', stats[0].columns[2])
+    self.assertEqual('some comment', stats[0].columns[3])
+
+    appearances = cluster.metadata().chart_appearances()
+    self.assertEqual(2, len(appearances))
+
+    appearance1 = appearances[0]
+    self.assertEqual('ma', appearance1.title)
+    self.assertEqual(1, len(appearance1.modifiers))
+    self.assertEqual(MovingAverageChartAppearanceModifier, type(appearance1.modifiers[0]))
+    self.assertEqual(20, appearance1.modifiers[0].offset)
+
+    appearance2 = appearances[1]
+    self.assertEqual('periodic', appearance2.title)
+    self.assertEqual(1, len(appearance2.modifiers))
+    self.assertEqual(PeriodChartAppearanceModifier, type(appearance2.modifiers[0]))
+    self.assertEqual(PeriodChartAppearanceModifier.Unit.DAY, appearance2.modifiers[0].time_unit)
+    self.assertEqual(7, appearance2.modifiers[0].time_period_size)
+
+  def test_to_string_with_complext_metadata(self):
+    chart_appearances = []
+    chart_appearances.append(ChartAppearance('title1', [MovingAverageChartAppearanceModifier(2)]))
+    chart_appearances.append(ChartAppearance('title2', [PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.DAY, 7)]))
+    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], chart_appearances)
+    entries = [StatsEntry.from_str('28/05/2019;123')]
+
+    cluster = StatsCluster(metadata, entries)
+
+    expected_str = \
+'''===
+- what: chart
+  title: title1
+  type: moving-average
+  offset: 2
+- what: chart
+  title: title2
+  type: period
+  unit: days
+  unit-value: 7
+- what: format
+  value: date;value
+===
+28/05/2019;123'''
+    self.assertEqual(expected_str, str(cluster))
 
   def test_types_in_metadata_used(self):
     cluster = StatsCluster.from_str('date;value;id;comment\n13/05/2019;123;some_id;some comment')

@@ -10,6 +10,7 @@ from core.utils import check_output
 from core.commit import Commit
 from core.stats_entry import StatsEntry
 from core.stats_cluster import StatsCluster
+from core.stats_metadata import StatsMetadata
 
 def extract_commits_history(repo_path, start_date, end_date, authors = []):
   output = check_output('git -C {} log --no-merges --after={} --until={} --format=format:"%H;%aI;%aN;%s"'.format(repo_path, start_date, end_date),
@@ -72,4 +73,5 @@ def convert_commits_to_stats_cluster(commits, aliases={}):
 
   if len(entries) == 0:
     return None
-  return StatsCluster.from_typed_entries(entries).collapse()
+  metadata = StatsMetadata(stat_column_types=entries[0].types)
+  return StatsCluster.from_typed_entries(entries, metadata).collapse()

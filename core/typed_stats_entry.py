@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from core.stats_metadata import StatsMetadata
 from core.stats_entry import StatsEntry
 from core.stat_column_type import StatColumnType
 
@@ -31,16 +30,18 @@ def _TypedStatsEntry__typed_column_to_str(stat_column_type, typed_column):
     raise ValueError('Unexpected type {} for column {}'.format(stat_column_type, typed_column))
 
 class TypedStatsEntry:
-  def __init__(self, stats_entry, metadata):
+  def __init__(self, stats_entry, types):
+    if not isinstance(types, list):
+      raise ValueError('Types are expected to be a list, but is {}'.format(type(types)))
     self.not_typed = stats_entry
-    self.metadata = metadata
+    self.types = types
 
   @staticmethod
   def from_stats(stat_column_types, typed_columns):
     columns = []
     for indx, typed_column in enumerate(typed_columns):
       columns.append(__typed_column_to_str(stat_column_types[indx], typed_column))
-    return TypedStatsEntry(StatsEntry(columns), StatsMetadata(stat_column_types))
+    return TypedStatsEntry(StatsEntry(columns), stat_column_types)
 
   def value(self):
     result = self.__get_column_of_type(StatColumnType.VALUE)
@@ -62,17 +63,17 @@ class TypedStatsEntry:
 
   def __get_column_of_type(self, stat_column_type):
     indexes = []
-    for indx, curr_stat_column_type in enumerate(self.metadata.types()):
+    for indx, curr_stat_column_type in enumerate(self.types):
       if curr_stat_column_type is stat_column_type:
         indexes.append(indx)
     if len(indexes) == 0:
       return None
     if len(indexes) > 1:
-      raise ValueError('Number of columns with type {} != 1. Indexes: {}, metadata: {}'.format(stat_column_type, indexes, self.metadata))
+      raise ValueError('Number of columns with type {} != 1. Indexes: {}, types: {}'.format(stat_column_type, indexes, self.types))
     return self.not_typed.columns[indexes[0]]
 
   def at(self, indx):
-    stat_column_type = self.metadata.types()[indx]
+    stat_column_type = self.types[indx]
     if stat_column_type is StatColumnType.DATE:
       return __str_to_date(self.not_typed.columns[indx])
     elif stat_column_type is StatColumnType.ID or stat_column_type is StatColumnType.COMMENT:
