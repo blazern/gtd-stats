@@ -17,7 +17,10 @@ def _ChartLineData__stats_entries_to_x_y_data(metadata, stats_entries):
     if prev_date is None:
       prev_date = stats_entries[index].date()
       x.append(stats_entries[index].date())
-      y.append(stats_entries[index].value())
+      value = stats_entries[index].value()
+      if value is None:
+        value = 1
+      y.append(value)
       continue
     curr_date = stats_entries[index].date()
     days_diff = (curr_date - prev_date).days
@@ -27,14 +30,15 @@ def _ChartLineData__stats_entries_to_x_y_data(metadata, stats_entries):
         x.append(mid_date)
         y.append(0)
     x.append(curr_date)
-    y.append(stats_entries[index].value())
+    value = stats_entries[index].value()
+    if value is None:
+      value = 1
+    y.append(value)
     prev_date = curr_date
   return x, y
 
 class ChartData:
   def __init__(self, stats_cluster):
-    if StatColumnType.VALUE not in stats_cluster.metadata().types():
-      raise ValueError('Can\'t create a chart without values. Metadata: {}'.format(str(metadata)))
     self._lines = []
 
     if StatColumnType.ID in stats_cluster.metadata().types():
