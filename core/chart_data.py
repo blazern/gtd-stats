@@ -6,7 +6,7 @@ from itertools import *
 from core.stats_metadata import StatsMetadata
 from core.stat_column_type import StatColumnType
 
-def _ChartLineData__stats_entries_to_x_y_data(metadata, stats_entries):
+def _ChartLineData__stats_entries_to_x_y_data(stats_entries, value_column_index):
   if len(stats_entries) == 0:
     return [], []
   stats_entries = sorted(stats_entries, key=lambda entry: entry.date())
@@ -17,7 +17,7 @@ def _ChartLineData__stats_entries_to_x_y_data(metadata, stats_entries):
     if prev_date is None:
       prev_date = stats_entries[index].date()
       x.append(stats_entries[index].date())
-      value = stats_entries[index].value()
+      value = stats_entries[index].at(value_column_index)
       if value is None:
         value = 1
       y.append(value)
@@ -30,34 +30,66 @@ def _ChartLineData__stats_entries_to_x_y_data(metadata, stats_entries):
         x.append(mid_date)
         y.append(0)
     x.append(curr_date)
-    value = stats_entries[index].value()
+    value = stats_entries[index].at(value_column_index)
     if value is None:
       value = 1
     y.append(value)
     prev_date = curr_date
   return x, y
 
+def _ChartData__cluster_to_chart_line_seeds(cluster):
+  result = []
+
+  types = cluster.metadata().types()
+  types_extras = cluster.metadata().types_extras()
+  values_indexes = []
+  for indx, column_type in enumerate(cluster.metadata().types()):
+    if column_type is StatColumnType.VALUE:
+      values_indexes.append(indx)
+  if len(values_indexes) == 0:
+    raise ValueError('No VALUE column in cluster, can\'t produce x y data. Cluster: {}'.format(str(cluster)))
+  if len(values_indexes) > 1:
+    for indx in values_indexes:
+      type_extra = types_extras[indx]
+      if not isinstance(type_extra, str) or len(type_extra) == 0:
+        raise ValueError(('Invalid VALUE extra at index {}. '
+          + 'If there\'re more than 1 value, all values extras must be not empty. '
+          + 'Cluster: {}').format(indx, str(cluster)))
+
+  entries = list(cluster.typed_entries())
+  entry_id_func = lambda entry: entry.id()
+  if StatColumnType.ID in types:
+    entries = sorted(entries, key=entry_id_func)
+  for entries_group_id, entries_group in groupby(entries, entry_id_func):
+    entries_group = list(entries_group)
+    for indx in values_indexes:
+      if types_extras[indx] is None and entries_group_id is None:
+        title = ''
+      elif types_extras[indx] is None and entries_group_id is not None:
+        title = entries_group_id
+      elif types_extras[indx] is not None and entries_group_id is None:
+        title = types_extras[indx]
+      elif types_extras[indx] is not None and entries_group_id is not None:
+        title = '{}_{}'.format(entries_group_id, types_extras[indx])
+      else:
+        raise ValueError('Invalid state')
+      result.append(_ChartLineSeed(entries_group, title, indx))
+  return result
+
 class ChartData:
   def __init__(self, stats_cluster):
     self._lines = []
-
-    if StatColumnType.ID in stats_cluster.metadata().types():
-      entries = list(stats_cluster.typed_entries())
-      entry_id_func = lambda entry: entry.id()
-      entries = sorted(entries, key=entry_id_func)
-      for entries_group_id, entries_group in groupby(entries, entry_id_func):
-        entries_group = list(entries_group)
-        self._lines.append(ChartLineData(stats_cluster.metadata(), list(entries_group), title=entries_group_id))
-    else:
-      self._lines.append(ChartLineData(stats_cluster.metadata(), stats_cluster.entries(), title=''))
+    line_seeds = __cluster_to_chart_line_seeds(stats_cluster)
+    for seed in line_seeds:
+      self._lines.append(ChartLineData(seed))
 
   def lines(self):
     return self._lines
 
 class ChartLineData:
-  def __init__(self, metadata, entries, title):
-    self._title = title
-    self._xcoords, self._ycoords = __stats_entries_to_x_y_data(metadata, entries)
+  def __init__(self, seed):
+    self._title = seed.title
+    self._xcoords, self._ycoords = __stats_entries_to_x_y_data(seed.entries, seed.value_column_index)
 
   def title(self):
     return self._title
@@ -67,3 +99,9 @@ class ChartLineData:
 
   def y_coords(self):
     return self._ycoords
+
+class _ChartLineSeed:
+  def __init__(self, entries, title, value_column_index):
+    self.entries = entries
+    self.title = title
+    self.value_column_index = value_column_index

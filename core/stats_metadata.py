@@ -5,20 +5,29 @@ from core.stat_column_type import StatColumnType
 from core.chart_appearance import *
 
 class StatsMetadata:
-  def __init__(self, stat_column_types, chart_appearances=[]):
+  def __init__(self, stat_column_types, stat_column_types_extras=None, chart_appearances=[]):
+    if stat_column_types_extras is None:
+      stat_column_types_extras = [None for column_type in stat_column_types]
+    if len(stat_column_types) != len(stat_column_types_extras):
+      raise ValueError('Sizes of types and extras must be equal: {}, {}'.format(
+        stat_column_types, stat_column_types_extras))
     self._stat_column_types = stat_column_types
+    self._stat_column_types_extras = stat_column_types_extras
     self._chart_appearances = chart_appearances
 
   def types(self):
     return list(self._stat_column_types)
+
+  def types_extras(self):
+    return list(self._stat_column_types_extras)
 
   def chart_appearances(self):
     return list(self._chart_appearances)
 
   @staticmethod
   def from_str(string):
-    types, appearances = StatsMetadata._extract_types_and_appearances(string)
-    return StatsMetadata(types, appearances)
+    types, types_extras, appearances = StatsMetadata._extract_types_and_appearances(string)
+    return StatsMetadata(types, types_extras, appearances)
 
   @staticmethod
   def _extract_types_and_appearances(string):
@@ -29,15 +38,24 @@ class StatsMetadata:
   
   @staticmethod
   def _extract_types_and_appearances_simple(string):
-    return StatsMetadata._parse_types(string.strip()), []
+    types, types_extras = StatsMetadata._parse_types_data(string.strip())
+    return types, types_extras, []
 
   @staticmethod
-  def _parse_types(string):
+  def _parse_types_data(string):
     types_strs = string.split(';')
     types = []
+    types_extras = []
     for type_str in types_strs:
-      types.append(StatColumnType.from_str(type_str))
-    return types
+      type_and_extra = type_str.split(':')
+      types.append(StatColumnType.from_str(type_and_extra[0]))
+      if len(type_and_extra) == 1:
+        types_extras.append(None)
+      elif len(type_and_extra) == 2:
+        types_extras.append(type_and_extra[1])
+      else:
+        raise ValueError('Invalid size of type_and_extra: {}'.format(type_and_extra))
+    return types, types_extras
 
   @staticmethod
   def _extract_types_and_appearances_complex(string):
@@ -56,10 +74,11 @@ class StatsMetadata:
     metadata_dict = yaml.safe_load(string)
 
     types = None
+    types_extras = None
     appearances = []
     for metadata_entry in metadata_dict:
       if metadata_entry['what'] == 'format':
-        types = StatsMetadata._parse_types(metadata_entry['value'])
+        types, types_extras = StatsMetadata._parse_types_data(metadata_entry['value'])
       elif metadata_entry['what'] == 'chart':
         title = metadata_entry['title']
         if 'types' in metadata_entry:
@@ -88,7 +107,7 @@ class StatsMetadata:
           else:
             raise ValueError('Unexpected chart appearance type in: {}'.format(modifier_dict))
         appearances.append(ChartAppearance(title, modifiers))
-    return types, appearances
+    return types, types_extras, appearances
 
   @staticmethod
   def find_str_position(string):
@@ -149,6 +168,11 @@ class StatsMetadata:
 
   def _types_to_str(self):
     stat_column_types_strs = []
-    for stat_column_type in self._stat_column_types:
-      stat_column_types_strs.append(str(stat_column_type))
+    for i in range(len(self._stat_column_types)):
+      type_str = str(self._stat_column_types[i])
+      if self._stat_column_types_extras[i] is not None:
+        type_extra_str = ':{}'.format(self._stat_column_types_extras[i])
+      else:
+        type_extra_str = ''
+      stat_column_types_strs.append(type_str+type_extra_str)
     return ';'.join(stat_column_types_strs)

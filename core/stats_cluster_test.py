@@ -87,7 +87,7 @@ class StatsClusterTests(unittest.TestCase):
     chart_appearances = []
     chart_appearances.append(ChartAppearance('title1', [MovingAverageChartAppearanceModifier(2)]))
     chart_appearances.append(ChartAppearance('title2', [PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.DAY, 7)]))
-    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], chart_appearances)
+    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], None, chart_appearances)
     entries = [StatsEntry.from_str('28/05/2019;123')]
 
     cluster = StatsCluster(metadata, entries)

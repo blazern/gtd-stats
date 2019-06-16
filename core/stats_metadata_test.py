@@ -23,6 +23,25 @@ class StatsMetadataTests(unittest.TestCase):
     metadata = StatsMetadata.from_str(metadata_str)
     self.assertEqual(metadata_str, str(metadata))
 
+  def test_parse_simple_str_with_extras(self):
+    metadata_str = 'date;value:atata'
+    metadata = StatsMetadata.from_str(metadata_str)
+
+    types = metadata.types()
+    self.assertEqual(2, len(types))
+    self.assertEqual(types[0], StatColumnType.DATE)
+    self.assertEqual(types[1], StatColumnType.VALUE)
+
+    types_extras = metadata.types_extras()
+    self.assertEqual(2, len(types_extras))
+    self.assertEqual(types_extras[0], None)
+    self.assertEqual(types_extras[1], 'atata')    
+
+  def test_to_simple_string_with_extras(self):
+    metadata_str = 'date;value:atata;id;comment'
+    metadata = StatsMetadata.from_str(metadata_str)
+    self.assertEqual(metadata_str, str(metadata))
+
   def test_find_simple_string_position(self):
     string =\
 '''\
@@ -153,7 +172,7 @@ date;value
                                             [MovingAverageChartAppearanceModifier(3),
                                              PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.YEAR, 2)]))
     chart_appearances.append(ChartAppearance('title3', [PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.DAY, 7)]))
-    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], chart_appearances)
+    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], None, chart_appearances)
 
     expected_str =\
 '''
