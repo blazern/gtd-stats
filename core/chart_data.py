@@ -6,22 +6,14 @@ from itertools import *
 from core.stats_metadata import StatsMetadata
 from core.stat_column_type import StatColumnType
 
-def _ChartLineData__stats_entries_to_x_y_data(stats_entries, value_column_index):
+def _ChartLineData__stats_entries_to_x_y_data(stats_entries, value_column_index, earliest_date):
   if len(stats_entries) == 0:
     return [], []
   stats_entries = sorted(stats_entries, key=lambda entry: entry.date())
   x = []
   y = []
-  prev_date = None
+  prev_date = earliest_date
   for index in range(0, len(stats_entries)):
-    if prev_date is None:
-      prev_date = stats_entries[index].date()
-      x.append(stats_entries[index].date())
-      value = stats_entries[index].at(value_column_index)
-      if value is None:
-        value = 1
-      y.append(value)
-      continue
     curr_date = stats_entries[index].date()
     days_diff = (curr_date - prev_date).days
     if days_diff > 1:
@@ -35,6 +27,9 @@ def _ChartLineData__stats_entries_to_x_y_data(stats_entries, value_column_index)
       value = 1
     y.append(value)
     prev_date = curr_date
+  if x[0] != earliest_date:
+    x = [earliest_date] + x
+    y = [0] + y
   return x, y
 
 def _ChartData__cluster_to_chart_line_seeds(cluster):
@@ -57,6 +52,8 @@ def _ChartData__cluster_to_chart_line_seeds(cluster):
           + 'Cluster: {}').format(indx, str(cluster)))
 
   entries = list(cluster.typed_entries())
+  earliest_date = min([entry.date() for entry in entries])
+
   entry_id_func = lambda entry: entry.id()
   if StatColumnType.ID in types:
     entries = sorted(entries, key=entry_id_func)
@@ -73,7 +70,7 @@ def _ChartData__cluster_to_chart_line_seeds(cluster):
         title = '{}_{}'.format(entries_group_id, types_extras[indx])
       else:
         raise ValueError('Invalid state')
-      result.append(_ChartLineSeed(entries_group, title, indx))
+      result.append(_ChartLineSeed(entries_group, title, indx, earliest_date))
   return result
 
 class ChartData:
@@ -89,7 +86,9 @@ class ChartData:
 class ChartLineData:
   def __init__(self, seed):
     self._title = seed.title
-    self._xcoords, self._ycoords = __stats_entries_to_x_y_data(seed.entries, seed.value_column_index)
+    self._xcoords, self._ycoords = __stats_entries_to_x_y_data(seed.entries,
+                                                               seed.value_column_index,
+                                                               seed.earliest_date)
 
   def title(self):
     return self._title
@@ -101,7 +100,8 @@ class ChartLineData:
     return self._ycoords
 
 class _ChartLineSeed:
-  def __init__(self, entries, title, value_column_index):
+  def __init__(self, entries, title, value_column_index, earliest_date):
     self.entries = entries
     self.title = title
     self.value_column_index = value_column_index
+    self.earliest_date = earliest_date
