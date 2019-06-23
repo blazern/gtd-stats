@@ -7,7 +7,7 @@ from core.stats_cluster import StatsCluster
 
 def load_from(file_path):
   if not os.path.exists(file_path):
-    return []
+    return None
 
   with open(file_path, 'r') as text_file:
     text = text_file.read()

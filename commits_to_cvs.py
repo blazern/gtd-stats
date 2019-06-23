@@ -89,11 +89,11 @@ def main(argv):
   stats_cluster = convert_commits_to_stats_cluster(commits, aliases)
 
   if options.extra_input_file is not None:
-    file_stats_cluster = stats_file_utils.load_from(options.extra_input_file)
+    file_stats_cluster = core.stats_file_utils.load_from(options.extra_input_file)
     stats_cluster = stats_cluster.merge(file_stats_cluster, prioritized=stats_cluster)
 
   if options.output_file is not None:
-    stats_file_utils.write_into(options.output_file,
+    core.stats_file_utils.write_into(options.output_file,
                                 stats_cluster,
                                 options.backups_dir,
                                 options.backups_limit)
