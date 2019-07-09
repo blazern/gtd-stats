@@ -1,10 +1,10 @@
-from core.stats_entry import StatsEntry
+from core.stats.stats_entry import StatsEntry
 
 from datetime import timedelta
 from itertools import *
 
-from core.stats_metadata import StatsMetadata
-from core.stat_column_type import StatColumnType
+from core.stats.stats_metadata import StatsMetadata
+from core.stats.stat_column_type import StatColumnType
 
 def _ChartLineData__stats_entries_to_x_y_data(stats_entries, value_column_index, earliest_date):
   if len(stats_entries) == 0:

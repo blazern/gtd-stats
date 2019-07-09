@@ -1,6 +1,6 @@
-from core.stat_column_type import StatColumnType
-from core.stats_entry import StatsEntry
-from core.typed_stats_entry import TypedStatsEntry
+from core.stats.stat_column_type import StatColumnType
+from core.stats.stats_entry import StatsEntry
+from core.stats.typed_stats_entry import TypedStatsEntry
 
 class Commit:
   def __init__(self, sha1, date, author, msg):

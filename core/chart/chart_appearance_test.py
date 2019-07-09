@@ -2,7 +2,7 @@ import unittest
 
 from datetime import datetime
 
-from core.chart_appearance import *
+from core.chart.chart_appearance import *
 
 def str_to_date(date_str):
   return datetime.strptime(date_str, '%d/%m/%Y')

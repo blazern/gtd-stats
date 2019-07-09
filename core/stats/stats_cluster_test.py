@@ -3,11 +3,11 @@ import math
 
 from datetime import datetime
 
-from core.stats_cluster import StatsCluster
-from core.stat_column_type import StatColumnType
-from core.stats_metadata import StatsMetadata
-from core.stats_entry import StatsEntry
-from core.chart_appearance import *
+from core.stats.stats_cluster import StatsCluster
+from core.stats.stat_column_type import StatColumnType
+from core.stats.stats_metadata import StatsMetadata
+from core.stats.stats_entry import StatsEntry
+from core.chart.chart_appearance import *
 
 class StatsClusterTests(unittest.TestCase):
   def test_from_string(self):

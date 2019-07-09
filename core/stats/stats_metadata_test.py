@@ -1,9 +1,9 @@
 import unittest
 import core.test_utils as test_utils
 
-from core.stats_metadata import StatsMetadata
-from core.stats_metadata import StatColumnType
-from core.chart_appearance import *
+from core.stats.stats_metadata import StatsMetadata
+from core.stats.stats_metadata import StatColumnType
+from core.chart.chart_appearance import *
 
 class StatsMetadataTests(unittest.TestCase):
   def test_parse_simple_str(self):

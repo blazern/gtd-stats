@@ -7,8 +7,8 @@ from subprocess import DEVNULL
 from datetime import datetime
 from random import random
 
-from core.commits_stats import extract_commits_history
-from core.commits_stats import convert_commits_to_stats_cluster
+from core.git.commits_stats import extract_commits_history
+from core.git.commits_stats import convert_commits_to_stats_cluster
 from core.utils import check_call
 from core.utils import check_output
 

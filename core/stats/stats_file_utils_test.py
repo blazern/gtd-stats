@@ -3,10 +3,10 @@ from core import test_utils
 
 import os
 
-from core import stats_file_utils
-from core.stats_entry import StatsEntry
-from core.stats_metadata import StatsMetadata
-from core.stats_cluster import StatsCluster
+from core.stats import stats_file_utils
+from core.stats.stats_entry import StatsEntry
+from core.stats.stats_metadata import StatsMetadata
+from core.stats.stats_cluster import StatsCluster
 
 class StatsFileUtilsTests(unittest.TestCase):
   def test_can_load_stats_from_file(self):

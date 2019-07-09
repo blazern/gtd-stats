@@ -2,8 +2,8 @@ import unittest
 
 from datetime import datetime
 
-from core.stats_cluster import StatsCluster
-from core.chart_data import ChartData
+from core.stats.stats_cluster import StatsCluster
+from core.chart.chart_data import ChartData
 
 def lines_to_lines_dict(lines):
   lines_dict = {}

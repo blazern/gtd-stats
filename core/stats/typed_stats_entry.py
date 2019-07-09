@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from core.stats_entry import StatsEntry
-from core.stat_column_type import StatColumnType
+from core.stats.stats_entry import StatsEntry
+from core.stats.stat_column_type import StatColumnType
 
 def _TypedStatsEntry__normalize_date(date):
   # Remove hours, minutes, seconds, etc

@@ -2,8 +2,8 @@ import os
 import shutil
 from datetime import datetime
 
-from core.stats_entry import StatsEntry
-from core.stats_cluster import StatsCluster
+from core.stats.stats_entry import StatsEntry
+from core.stats.stats_cluster import StatsCluster
 
 def load_from(file_path):
   if not os.path.exists(file_path):

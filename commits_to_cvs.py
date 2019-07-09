@@ -6,11 +6,11 @@ import re
 
 from datetime import datetime
 
-import core.stats_file_utils
-from core.stats_entry import StatsEntry
-from core.commits_stats import extract_commits_history
-from core.commits_stats import convert_commits_to_stats_cluster
-from core.commits_stats import validate_commits_authors_aliases
+import core.stats.stats_file_utils
+from core.stats.stats_entry import StatsEntry
+from core.git.commits_stats import extract_commits_history
+from core.git.commits_stats import convert_commits_to_stats_cluster
+from core.git.commits_stats import validate_commits_authors_aliases
 
 def extract_date_from(date_str):
   date_pattern = re.compile('^\d\d\d\d-\d\d-\d\d$')
@@ -89,11 +89,11 @@ def main(argv):
   stats_cluster = convert_commits_to_stats_cluster(commits, aliases)
 
   if options.extra_input_file is not None:
-    file_stats_cluster = core.stats_file_utils.load_from(options.extra_input_file)
+    file_stats_cluster = core.stats.stats_file_utils.load_from(options.extra_input_file)
     stats_cluster = stats_cluster.merge(file_stats_cluster, prioritized=stats_cluster)
 
   if options.output_file is not None:
-    core.stats_file_utils.write_into(options.output_file,
+    core.stats.stats_file_utils.write_into(options.output_file,
                                 stats_cluster,
                                 options.backups_dir,
                                 options.backups_limit)

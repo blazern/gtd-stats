@@ -1,7 +1,7 @@
-from core.typed_stats_entry import TypedStatsEntry
-from core.stats_metadata import StatsMetadata
-from core.stats_entry import StatsEntry
-from core.stat_column_type import StatColumnType
+from core.stats.typed_stats_entry import TypedStatsEntry
+from core.stats.stats_metadata import StatsMetadata
+from core.stats.stats_entry import StatsEntry
+from core.stats.stat_column_type import StatColumnType
 
 def _StatsCluster__entries_to_typed_entries(metadata, stats_entries):
   result = []

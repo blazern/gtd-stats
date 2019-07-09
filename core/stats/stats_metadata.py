@@ -1,8 +1,8 @@
 import sys
 import yaml
 
-from core.stat_column_type import StatColumnType
-from core.chart_appearance import *
+from core.stats.stat_column_type import StatColumnType
+from core.chart.chart_appearance import *
 
 class StatsMetadata:
   def __init__(self, stat_column_types, stat_column_types_extras=None, chart_appearances=[]):

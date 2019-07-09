@@ -8,9 +8,9 @@ import subprocess
 from plotly.offline import plot
 import plotly.graph_objs as graph_objs
 
-import core.stats_file_utils as stats_file_utils
-from core.stats_entry import StatsEntry
-from core.chart_data import ChartData
+import core.stats.stats_file_utils as stats_file_utils
+from core.stats.stats_entry import StatsEntry
+from core.chart.chart_data import ChartData
 
 def file_to_html_chart(path):
   cluster = stats_file_utils.load_from(path)

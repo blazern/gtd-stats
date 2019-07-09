@@ -2,9 +2,9 @@ import unittest
 
 from datetime import datetime
 
-from core.commit import Commit
-from core.stats_entry import StatsEntry
-from core.typed_stats_entry import TypedStatsEntry
+from core.git.commit import Commit
+from core.stats.stats_entry import StatsEntry
+from core.stats.typed_stats_entry import TypedStatsEntry
 
 class CommitTests(unittest.TestCase):
   def test_can_convert_into_stats_entry(self):

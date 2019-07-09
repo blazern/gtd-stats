@@ -1,6 +1,6 @@
 import unittest
 
-from core.stat_column_type import StatColumnType
+from core.stats.stat_column_type import StatColumnType
 
 class StatColumnTypeTests(unittest.TestCase):
   def test_converts_to_str(self):

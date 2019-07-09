@@ -2,7 +2,7 @@ import unittest
 
 from datetime import datetime
 
-from core.stats_entry import StatsEntry
+from core.stats.stats_entry import StatsEntry
 
 class StatsEntryTests(unittest.TestCase):
   def test_str_format(self):
