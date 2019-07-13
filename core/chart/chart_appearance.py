@@ -2,24 +2,24 @@ from collections import OrderedDict
 from enum import Enum
 from datetime import datetime
 
-class ChartAppearance:
-  def __init__(self, title, modifiers=[]):
-    types = set()
-    for modifier in modifiers:
-      if type(modifier) in types:
-        raise ValueError('Can\' have more than 1 modifier of same types. Duplicating modifier: {}'.format(type(modifier)))
-      types.add(type(modifier))
-    self.title = title
-    self.modifiers = modifiers
+# class ChartAppearance:
+#   def __init__(self, title, modifiers=[]):
+#     types = set()
+#     for modifier in modifiers:
+#       if type(modifier) in types:
+#         raise ValueError('Can\' have more than 1 modifier of same types. Duplicating modifier: {}'.format(type(modifier)))
+#       types.add(type(modifier))
+#     self.title = title
+#     self.modifiers = modifiers
 
-  def convert_coords(self, coords_x, coords_y):
-    if len(coords_x) != len(coords_y):
-      raise ValueError('Lengths of x and y coords is different: {}, {}'.format(coords_x, coords_y))
-    converted_x = coords_x
-    converted_y = coords_y
-    for modifier in self.modifiers:
-      converted_x, converted_y = modifier.convert_coords(converted_x, converted_y)
-    return converted_x, converted_y
+#   def convert_coords(self, coords_x, coords_y):
+#     if len(coords_x) != len(coords_y):
+#       raise ValueError('Lengths of x and y coords is different: {}, {}'.format(coords_x, coords_y))
+#     converted_x = coords_x
+#     converted_y = coords_y
+#     for modifier in self.modifiers:
+#       converted_x, converted_y = modifier.convert_coords(converted_x, converted_y)
+#     return converted_x, converted_y
 
 class MovingAverageChartAppearanceModifier:
   def __init__(self, offset):
