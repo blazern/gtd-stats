@@ -74,21 +74,26 @@ def _ChartData__cluster_to_chart_line_seeds(cluster):
   return result
 
 class ChartData:
-  def __init__(self, stats_cluster):
+  def __init__(self, stats_cluster, chart_appearance=None):
     self._lines = []
     line_seeds = __cluster_to_chart_line_seeds(stats_cluster)
     for seed in line_seeds:
-      self._lines.append(ChartLineData(seed))
+      self._lines.append(ChartLineData(seed, chart_appearance))
+    if chart_appearance is not None
 
   def lines(self):
     return self._lines
 
+  def title(self):
+    return self._title
+
 class ChartLineData:
-  def __init__(self, seed):
+  def __init__(self, seed, chart_appearance):
     self._title = seed.title
-    self._xcoords, self._ycoords = __stats_entries_to_x_y_data(seed.entries,
-                                                               seed.value_column_index,
-                                                               seed.earliest_date)
+    xcoords, ycoords = __stats_entries_to_x_y_data(seed.entries,
+                                                   seed.value_column_index,
+                                                   seed.earliest_date)
+    self._xcoords, self._ycoords = chart_appearance.convert_coords(xcoords, ycoords)
 
   def title(self):
     return self._title

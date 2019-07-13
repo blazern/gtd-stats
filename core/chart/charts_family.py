@@ -1,9 +1,13 @@
 from core.chart.chart_appearance import *
-
+from core.chart.charts_data import *
 
 def _ChartsFamily__cluster_to_charts_data(stats_cluster):
-  # TODO: first parse all chart_modifiers and stats_modifiers,
-  # TODO: TODO: what second?
+  appearances = __extract_appearances_from(stats_cluster)
+  result = ChartData(stats_cluster, None)
+  result += [ChartData(stats_cluster, appearance) for appearance in appearances]
+  return result
+
+def __extract_appearances_from(stats_cluster):
   metadata_dict = stats_cluster.metadata().raw_metadata_dict()
   appearances = []
   for metadata_entry in metadata_dict:
@@ -35,10 +39,12 @@ def _ChartsFamily__cluster_to_charts_data(stats_cluster):
         else:
           raise ValueError('Unexpected chart appearance type in: {}'.format(modifier_dict))
       appearances.append(ChartAppearance(title, modifiers))
+  return appearances
+
 
 class ChartsFamily:
   def __init__(self, stats_cluster):
     self._charts_data = __cluster_to_charts_data(stats_cluster)
 
   def charts_data(self):
-    return self._charts_data
+    return list(self._charts_data)
