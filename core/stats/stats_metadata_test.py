@@ -6,6 +6,9 @@ from core.stats.stats_metadata import StatColumnType
 from core.chart.chart_appearance import *
 
 class StatsMetadataTests(unittest.TestCase):
+  def setUp(self):
+    self.maxDiff = None
+
   def test_parse_simple_str(self):
     metadata_str = 'date;value;id;comment'
     metadata = StatsMetadata.from_str(metadata_str)
@@ -113,19 +116,6 @@ date;value
 '''\
 ===
 - what: chart
-  title: my name 1
-  types:
-  - type: moving-average
-    offset: 3
-  - type: period
-    unit: days
-    unit-value: 7
-- what: chart
-  title: months!
-  type: period
-  unit: months
-  unit-value: 1
-- what: chart
   title: pretty average!
   type: moving-average
   offset: 6
@@ -140,63 +130,13 @@ date;value
     self.assertEqual(types[0], StatColumnType.DATE)
     self.assertEqual(types[1], StatColumnType.ID)
 
-    appearances = metadata.chart_appearances()
-    self.assertEqual(3, len(appearances))
+    raw_metadata = metadata.raw_metadata()
+    self.assertEqual(2, len(raw_metadata))
 
-    appearance1 = appearances[0]
-    self.assertEqual('my name 1', appearance1.title)
-    self.assertEqual(2, len(appearance1.modifiers))
-    self.assertEqual(MovingAverageChartAppearanceModifier, type(appearance1.modifiers[0]))
-    self.assertEqual(3, appearance1.modifiers[0].offset)
-    self.assertEqual(PeriodChartAppearanceModifier, type(appearance1.modifiers[1]))
-    self.assertEqual(PeriodChartAppearanceModifier.Unit.DAY, appearance1.modifiers[1].time_unit)
-    self.assertEqual(7, appearance1.modifiers[1].time_period_size)
+    self.assertEqual('chart', raw_metadata[0]['what'])
+    self.assertEqual('pretty average!', raw_metadata[0]['title'])
+    self.assertEqual('moving-average', raw_metadata[0]['type'])
+    self.assertEqual(6, raw_metadata[0]['offset'])
 
-    appearance2 = appearances[1]
-    self.assertEqual('months!', appearance2.title)
-    self.assertEqual(1, len(appearance2.modifiers))
-    self.assertEqual(PeriodChartAppearanceModifier, type(appearance2.modifiers[0]))
-    self.assertEqual(PeriodChartAppearanceModifier.Unit.MONTH, appearance2.modifiers[0].time_unit)
-    self.assertEqual(1, appearance2.modifiers[0].time_period_size)
-
-    appearance3 = appearances[2]
-    self.assertEqual('pretty average!', appearance3.title)
-    self.assertEqual(1, len(appearance3.modifiers))
-    self.assertEqual(MovingAverageChartAppearanceModifier, type(appearance3.modifiers[0]))
-    self.assertEqual(6, appearance3.modifiers[0].offset)
-
-  def test_complex_metadata_string_encoding(self):
-    chart_appearances = []
-    chart_appearances.append(ChartAppearance('title1', [MovingAverageChartAppearanceModifier(2)]))
-    chart_appearances.append(ChartAppearance('title2',
-                                            [MovingAverageChartAppearanceModifier(3),
-                                             PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.YEAR, 2)]))
-    chart_appearances.append(ChartAppearance('title3', [PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.DAY, 7)]))
-    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], None, chart_appearances)
-
-    expected_str =\
-'''
-===
-- what: chart
-  title: title1
-  type: moving-average
-  offset: 2
-- what: chart
-  title: title2
-  types:
-  - type: moving-average
-    offset: 3
-  - type: period
-    unit: years
-    unit-value: 2
-- what: chart
-  title: title3
-  type: period
-  unit: days
-  unit-value: 7
-- what: format
-  value: date;value
-===
-'''
-    self.maxDiff = None
-    self.assertEqual(expected_str.strip(), str(metadata))
+    self.assertEqual('format', raw_metadata[1]['what'])
+    self.assertEqual('date;id', raw_metadata[1]['value'])

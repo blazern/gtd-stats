@@ -11,29 +11,21 @@ import plotly.graph_objs as graph_objs
 import core.stats.stats_file_utils as stats_file_utils
 from core.stats.stats_entry import StatsEntry
 from core.chart.chart_data import ChartData
+from core.chart.charts_family import *
 
 def file_to_html_chart(path):
   cluster = stats_file_utils.load_from(path)
-  chart_data = ChartData(cluster)
-
   cvs_file_name = os.path.basename(path)
+  charts_family = ChartsFamily(cluster, title_base=cvs_file_name)
+
   cvs_graph_objs_dict = {}
-
-  cvs_graph_objs = []
-  for line in chart_data.lines():
-    cvs_graph_objs.append(graph_objs.Scatter(x=line.x_coords(),
-                                             y=line.y_coords(),
-                                             name=line.title()))
-  cvs_graph_objs_dict[cvs_file_name] = cvs_graph_objs
-
-  for appearance in cluster.metadata().chart_appearances():
+  for chart_data in charts_family.charts_data():
     cvs_graph_objs = []
     for line in chart_data.lines():
-      x_coords, y_coords = appearance.convert_coords(line.x_coords(), line.y_coords())
-      cvs_graph_objs.append(graph_objs.Scatter(x=x_coords,
-                                               y=y_coords,
+      cvs_graph_objs_dict[chart_data.title()] = cvs_graph_objs
+      cvs_graph_objs.append(graph_objs.Scatter(x=line.x_coords(),
+                                               y=line.y_coords(),
                                                name=line.title()))
-    cvs_graph_objs_dict['{} {}'.format(cvs_file_name, appearance.title)] = cvs_graph_objs
 
   files = {}
   for key, objs in cvs_graph_objs_dict.items():

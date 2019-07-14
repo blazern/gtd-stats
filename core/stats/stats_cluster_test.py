@@ -10,6 +10,9 @@ from core.stats.stats_entry import StatsEntry
 from core.chart.chart_appearance import *
 
 class StatsClusterTests(unittest.TestCase):
+  def setUp(self):
+    self.maxDiff = None
+
   def test_from_string(self):
     cluster = StatsCluster.from_str('date;value;id;comment\n13/05/2019;123;some_id;some comment')
 
@@ -67,27 +70,21 @@ class StatsClusterTests(unittest.TestCase):
     self.assertEqual('some_id321', stats[0].columns[2])
     self.assertEqual('some comment', stats[0].columns[3])
 
-    appearances = cluster.metadata().chart_appearances()
-    self.assertEqual(2, len(appearances))
-
-    appearance1 = appearances[0]
-    self.assertEqual('ma', appearance1.title)
-    self.assertEqual(1, len(appearance1.modifiers))
-    self.assertEqual(MovingAverageChartAppearanceModifier, type(appearance1.modifiers[0]))
-    self.assertEqual(20, appearance1.modifiers[0].offset)
-
-    appearance2 = appearances[1]
-    self.assertEqual('periodic', appearance2.title)
-    self.assertEqual(1, len(appearance2.modifiers))
-    self.assertEqual(PeriodChartAppearanceModifier, type(appearance2.modifiers[0]))
-    self.assertEqual(PeriodChartAppearanceModifier.Unit.DAY, appearance2.modifiers[0].time_unit)
-    self.assertEqual(7, appearance2.modifiers[0].time_period_size)
+    raw_metadata = cluster.metadata().raw_metadata()
+    self.assertEqual(3, len(raw_metadata))
+    self.assertEqual('chart', raw_metadata[0]['what'])
+    self.assertEqual(4, len(raw_metadata[0]))
+    self.assertEqual('chart', raw_metadata[1]['what'])
+    self.assertEqual(5, len(raw_metadata[1]))
+    self.assertEqual('format', raw_metadata[2]['what'])
+    self.assertEqual(2, len(raw_metadata[2]))
 
   def test_to_string_with_complext_metadata(self):
-    chart_appearances = []
-    chart_appearances.append(ChartAppearance('title1', [MovingAverageChartAppearanceModifier(2)]))
-    chart_appearances.append(ChartAppearance('title2', [PeriodChartAppearanceModifier(PeriodChartAppearanceModifier.Unit.DAY, 7)]))
-    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], None, chart_appearances)
+    raw_metadata = []
+    raw_metadata.append({'what':'chart', 'title':'title1', 'type':'moving-average', 'offset':2})
+    raw_metadata.append({'what':'chart', 'title':'title2', 'type':'period', 'unit':'days', 'unit-value':7})
+    raw_metadata.append({'what':'format', 'value':'date;value'})
+    metadata = StatsMetadata([StatColumnType.DATE, StatColumnType.VALUE], None, raw_metadata)
     entries = [StatsEntry.from_str('28/05/2019;123')]
 
     cluster = StatsCluster(metadata, entries)
