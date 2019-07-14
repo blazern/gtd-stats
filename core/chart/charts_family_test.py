@@ -2,7 +2,6 @@ import unittest
 
 from core.stats.stats_metadata import *
 from core.stats.stats_cluster import *
-from core.chart.chart_appearance import *
 from core.chart.charts_family import *
 
 class ChartFamilyTests(unittest.TestCase):
@@ -29,7 +28,7 @@ date;id;value
     self.assertEqual(1, len(chart_data.lines()[1].x_coords()))
     self.assertEqual(1, len(chart_data.lines()[1].y_coords()))
 
-  def test_has_chart_data_for_each_appearance(self):
+  def test_has_chart_data_for_each_modifier(self):
     cluster_str = \
 '''
 14/07/2019;123;danil;some comment

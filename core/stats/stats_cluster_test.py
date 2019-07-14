@@ -7,7 +7,6 @@ from core.stats.stats_cluster import StatsCluster
 from core.stats.stat_column_type import StatColumnType
 from core.stats.stats_metadata import StatsMetadata
 from core.stats.stats_entry import StatsEntry
-from core.chart.chart_appearance import *
 
 class StatsClusterTests(unittest.TestCase):
   def setUp(self):

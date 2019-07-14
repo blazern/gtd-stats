@@ -1,0 +1,76 @@
+import unittest
+
+from datetime import datetime
+from core.chart.modifiers.period_chart_modifier import *
+
+def str_to_date(date_str):
+  return datetime.strptime(date_str, '%d/%m/%Y')
+
+class PeriodChardModifierTest(unittest.TestCase):
+  def test_days_period_chart_modifier_works(self):
+    modifier = PeriodChartModifier(time_unit=PeriodChartModifier.Unit.DAY,
+                                   time_period_size=2)
+    x_coords = [str_to_date('22/05/2019'),
+                str_to_date('23/05/2019'),
+                str_to_date('24/05/2019'),
+                str_to_date('25/05/2019'),
+                str_to_date('26/05/2019')]
+    y_coords = [1, 2, 3, 4, 5]
+    expected_converted_x = ['22/05/2019-23/05/2019',
+                            '24/05/2019-25/05/2019',
+                            '26/05/2019']
+    expected_converted_y = [3, 7, 5]
+    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+    self.assertEqual(expected_converted_x, converted_x)
+    self.assertEqual(expected_converted_y, converted_y)
+
+  def test_months_period_chart_modifier_works(self):
+    modifier = PeriodChartModifier(time_unit=PeriodChartModifier.Unit.MONTH,
+                                   time_period_size=2)
+    x_coords = [str_to_date('21/01/2019'),
+                str_to_date('22/02/2019'),
+                str_to_date('23/02/2019'),
+                str_to_date('24/03/2019'),
+                str_to_date('25/04/2019'),
+                str_to_date('26/05/2019')]
+    y_coords = [1, 2, 3, 4, 5, 6]
+    expected_converted_x = ['01/2019-02/2019',
+                            '03/2019-04/2019',
+                            '05/2019']
+    expected_converted_y = [6, 9, 6]
+    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+    self.assertEqual(expected_converted_x, converted_x)
+    self.assertEqual(expected_converted_y, converted_y)
+
+  def test_months_period_chart_modifier_with_single_month_size_works(self):
+    modifier = PeriodChartModifier(time_unit=PeriodChartModifier.Unit.MONTH,
+                                   time_period_size=1)
+    x_coords = [str_to_date('21/01/2019'),
+                str_to_date('22/02/2019'),
+                str_to_date('23/02/2019'),
+                str_to_date('24/03/2019'),
+                str_to_date('25/04/2019'),
+                str_to_date('26/05/2019')]
+    y_coords = [1, 2, 3, 4, 5, 6]
+    expected_converted_x = ['01/2019', '02/2019', '03/2019', '04/2019', '05/2019']
+    expected_converted_y = [1, 5, 4, 5, 6]
+    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+    self.assertEqual(expected_converted_x, converted_x)
+    self.assertEqual(expected_converted_y, converted_y)
+
+  def test_years_period_chart_modifier_works(self):
+    modifier = PeriodChartModifier(time_unit=PeriodChartModifier.Unit.YEAR,
+                                   time_period_size=2)
+    x_coords = [str_to_date('21/01/2017'),
+                str_to_date('22/02/2017'),
+                str_to_date('23/02/2018'),
+                str_to_date('24/03/2018'),
+                str_to_date('25/04/2018'),
+                str_to_date('26/05/2019')]
+    y_coords = [1, 2, 3, 4, 5, 6]
+    expected_converted_x = ['2017-2018', '2019']
+    expected_converted_y = [15, 6]
+    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+    self.assertEqual(expected_converted_x, converted_x)
+    self.assertEqual(expected_converted_y, converted_y)
+

@@ -4,7 +4,8 @@ from datetime import datetime
 
 from core.stats.stats_cluster import *
 from core.chart.chart_data import *
-from core.chart.chart_appearance import *
+from core.chart.modifiers.moving_average_chart_modifier import *
+from core.chart.modifiers.chart_modifiers_composite import *
 
 def lines_to_lines_dict(lines):
   lines_dict = {}
@@ -156,7 +157,7 @@ class ChartDataTest(unittest.TestCase):
     self.assertEqual(0, lines_dict['kiril_valuename2'].y_coords()[0])
     self.assertEqual(20, lines_dict['kiril_valuename2'].y_coords()[1])
 
-  def test_uses_given_chart_appearance(self):
+  def test_uses_given_chart_modifier(self):
     cluster = StatsCluster.from_str('''
       date;value;id
       18/05/2019;2;danil
@@ -167,10 +168,8 @@ class ChartDataTest(unittest.TestCase):
       16/05/2019;1;danil
       ''')
 
-    moving_average_modifier = MovingAverageChartAppearanceModifier(offset=2)
-    chart_appearance = ChartAppearance('title', [moving_average_modifier])
-
-    chart_data = ChartData(cluster, chart_appearance)
+    moving_average_modifier = MovingAverageChartModifier(offset=2)
+    chart_data = ChartData(cluster, moving_average_modifier)
     lines = chart_data.lines()
     self.assertEqual(2, len(lines))
 
@@ -211,9 +210,7 @@ class ChartDataTest(unittest.TestCase):
       date;value;id
       14/07/2019;2;danil
       ''')
-    moving_average_modifier = MovingAverageChartAppearanceModifier(offset=2)
-    chart_appearance = ChartAppearance('appearance_title', [moving_average_modifier])
-
-    chart_data = ChartData(cluster, chart_appearance, title_base='title_base')
+    chart_modifier = ChartModifiersComposite('appearance_title', [])
+    chart_data = ChartData(cluster, chart_modifier, title_base='title_base')
     self.assertTrue('title_base' in chart_data.title())
     self.assertTrue('appearance_title' in chart_data.title())

@@ -1,11 +1,11 @@
-from core.chart.chart_appearance import *
+from core.chart.modifiers.chart_modifiers_composite import *
 from core.chart.chart_data import *
-from core.chart.utils import extract_chart_appearances_from_stats_metadata
+from core.chart.utils import extract_chart_modifiers_from_stats_metadata
 
 def _ChartsFamily__cluster_to_charts_data(stats_cluster, title_base):
-  appearances = extract_chart_appearances_from_stats_metadata(stats_cluster.metadata())
+  modifiers = extract_chart_modifiers_from_stats_metadata(stats_cluster.metadata())
   result = [ChartData(stats_cluster, None, title_base)]
-  result += [ChartData(stats_cluster, appearance, title_base) for appearance in appearances]
+  result += [ChartData(stats_cluster, modifier, title_base) for modifier in modifiers]
   return result
 
 class ChartsFamily:
