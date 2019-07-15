@@ -20,6 +20,22 @@ class PeriodChartModifier(ChartModifier):
     self.time_unit = time_unit
     self.time_period_size = time_period_size
 
+  @staticmethod
+  def try_create_from(modifier_dict):
+    if modifier_dict['type'] != 'period':
+      return None
+    unit = modifier_dict['unit']
+    if unit == 'days':
+      unit = PeriodChartModifier.Unit.DAY
+    elif unit == 'months':
+      unit = PeriodChartModifier.Unit.MONTH
+    elif unit == 'years':
+      unit = PeriodChartModifier.Unit.YEAR
+    else:
+      raise ValueError('Unknown time unit: {}'.format(unit))
+    unit_value = modifier_dict['unit-value']
+    return PeriodChartModifier(unit, unit_value)
+
   # Override
   def convert_coords(self, coords_x, coords_y):
     for x in coords_x:

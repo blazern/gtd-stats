@@ -15,3 +15,23 @@ class ChartsModifiersCompositeTest(unittest.TestCase):
     converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
     self.assertEqual(x_coords, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
+
+  def test_constructs_from_dict(self):
+    modifier_dict = {
+      'what': 'chart',
+      'title': 'some title',
+      'type': 'moving-average',
+      'offset': 3
+    }
+    modifier = MovingAverageChartModifier.try_create_from(modifier_dict)
+    self.assertEqual(3, modifier.offset)
+
+  def test_doesnt_construct_from_wrong_type_in_dict(self):
+    modifier_dict = {
+      'what': 'chart',
+      'title': 'some title',
+      'type': 'moving average',
+      'offset': 3
+    }
+    modifier = MovingAverageChartModifier.try_create_from(modifier_dict)
+    self.assertEqual(None, modifier)

@@ -3,6 +3,11 @@ from core.chart.modifiers.moving_average_chart_modifier import *
 from core.chart.modifiers.period_chart_modifier import *
 
 def extract_chart_modifiers_from_stats_metadata(metadata):
+  modifiers_fabrics = [
+    lambda metadata_dict: MovingAverageChartModifier.try_create_from(metadata_dict),
+    lambda metadata_dict: PeriodChartModifier.try_create_from(metadata_dict)
+  ]
+
   raw_metadata = metadata.raw_metadata()
   modifiers = []
   for metadata_entry in raw_metadata:
@@ -14,24 +19,17 @@ def extract_chart_modifiers_from_stats_metadata(metadata):
         submodifiers_dicts = metadata_entry['types']
       else:
         submodifiers_dicts = [metadata_entry]
+
       submodifiers = []
       for modifier_dict in submodifiers_dicts:
-        if modifier_dict['type'] == 'moving-average':
-          offset = modifier_dict['offset']
-          submodifiers.append(MovingAverageChartModifier(offset))
-        elif modifier_dict['type'] == 'period':
-          unit = modifier_dict['unit']
-          if unit == 'days':
-            unit = PeriodChartModifier.Unit.DAY
-          elif unit == 'months':
-            unit = PeriodChartModifier.Unit.MONTH
-          elif unit == 'years':
-            unit = PeriodChartModifier.Unit.YEAR
-          else:
-            raise ValueError('Unknown time unit: {}'.format(unit))
-          unit_value = modifier_dict['unit-value']
-          submodifiers.append(PeriodChartModifier(unit, unit_value))
-        else:
-          raise ValueError('Unexpected chart modifier type in: {}'.format(modifier_dict))
+        modifier = None
+        for modifier_fabric in modifiers_fabrics:
+          modifier = modifier_fabric(modifier_dict)
+          if modifier is not None:
+            break
+        if modifier is None:
+          raise ValueError('Couldn\'t find a modifier fabric to instantiate {}'.format(modifier_dict))
+        submodifiers.append(modifier)
+
       modifiers.append(ChartModifiersComposite(title, submodifiers))
   return modifiers

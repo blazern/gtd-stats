@@ -74,3 +74,25 @@ class PeriodChardModifierTest(unittest.TestCase):
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
+  def test_constructs_from_dict(self):
+    modifier_dict = {
+      'what':'chart',
+      'title': 'some title',
+      'type': 'period',
+      'unit': 'months',
+      'unit-value': 123
+    }
+    modifier = PeriodChartModifier.try_create_from(modifier_dict)
+    self.assertEqual(123, modifier.time_period_size)
+    self.assertEqual(PeriodChartModifier.Unit.MONTH, modifier.time_unit)
+
+  def test_doesnt_construct_from_wrong_type_in_dict(self):
+    modifier_dict = {
+      'what':'chart',
+      'title': 'some title',
+      'type': 'periodic stuff',
+      'unit': 'months',
+      'unit-value': 123
+    }
+    modifier = PeriodChartModifier.try_create_from(modifier_dict)
+    self.assertEqual(None, modifier)
