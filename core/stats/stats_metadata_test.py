@@ -139,3 +139,16 @@ date;value
 
     self.assertEqual('format', raw_metadata[1]['what'])
     self.assertEqual('date;id', raw_metadata[1]['value'])
+
+  def test_modifying_raw_metadata_returned_from_metadata_doesnt_change_inner_object(self):
+    string =\
+'''\
+===
+- what: format
+  value: date;id
+===
+'''
+    metadata = StatsMetadata.from_str(string)
+    self.assertEqual('date;id', metadata.raw_metadata()[0]['value'])
+    metadata.raw_metadata()[0]['value'] = 'corrupted value'
+    self.assertEqual('date;id', metadata.raw_metadata()[0]['value'])

@@ -2,11 +2,12 @@ import unittest
 
 from datetime import datetime
 from core.chart.modifiers.period_chart_modifier import *
+from core.chart.chart_data import *
 
 def str_to_date(date_str):
   return datetime.strptime(date_str, '%d/%m/%Y')
 
-class PeriodChardModifierTest(unittest.TestCase):
+class PeriodChartModifierTest(unittest.TestCase):
   def test_days_period_chart_modifier_works(self):
     modifier = PeriodChartModifier(time_unit=PeriodChartModifier.Unit.DAY,
                                    time_period_size=2)
@@ -20,7 +21,13 @@ class PeriodChardModifierTest(unittest.TestCase):
                             '24/05/2019-25/05/2019',
                             '26/05/2019']
     expected_converted_y = [3, 7, 5]
-    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifier.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
@@ -38,7 +45,13 @@ class PeriodChardModifierTest(unittest.TestCase):
                             '03/2019-04/2019',
                             '05/2019']
     expected_converted_y = [6, 9, 6]
-    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifier.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+    
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
@@ -54,7 +67,13 @@ class PeriodChardModifierTest(unittest.TestCase):
     y_coords = [1, 2, 3, 4, 5, 6]
     expected_converted_x = ['01/2019', '02/2019', '03/2019', '04/2019', '05/2019']
     expected_converted_y = [1, 5, 4, 5, 6]
-    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+    
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifier.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
@@ -70,7 +89,13 @@ class PeriodChardModifierTest(unittest.TestCase):
     y_coords = [1, 2, 3, 4, 5, 6]
     expected_converted_x = ['2017-2018', '2019']
     expected_converted_y = [15, 6]
-    converted_x, converted_y = modifier.convert_coords(x_coords, y_coords)
+    
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifier.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+    
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 

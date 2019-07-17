@@ -3,6 +3,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 from core.chart.modifiers.chart_modifier import *
+from core.chart.chart_data import *
 
 class PeriodChartModifier(ChartModifier):
   class Unit(Enum):
@@ -37,7 +38,14 @@ class PeriodChartModifier(ChartModifier):
     return PeriodChartModifier(unit, unit_value)
 
   # Override
-  def convert_coords(self, coords_x, coords_y):
+  def convert_lines(self, lines):
+    updated_lines = []
+    for line in lines:
+      x_coords, y_coords = self._convert_coords(line.x_coords(), line.y_coords())
+      updated_lines.append(ChartLineData(line.title(), x_coords, y_coords))
+    return updated_lines
+
+  def _convert_coords(self, coords_x, coords_y):
     for x in coords_x:
       if not isinstance(x, datetime):
         raise ValueError('Only accepting datetime as X type, received: {}'.format(type(x)))

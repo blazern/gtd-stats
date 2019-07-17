@@ -6,52 +6,26 @@ from itertools import *
 from core.stats.stats_metadata import StatsMetadata
 from core.stats.stat_column_type import StatColumnType
 
-def _ChartLineData__stats_entries_to_x_y_data(stats_entries, value_column_index, earliest_date):
-  if len(stats_entries) == 0:
-    return [], []
-  stats_entries = sorted(stats_entries, key=lambda entry: entry.date())
-  x = []
-  y = []
-  prev_date = earliest_date
-  for index in range(0, len(stats_entries)):
-    curr_date = stats_entries[index].date()
-    days_diff = (curr_date - prev_date).days
-    if days_diff > 1:
-      for day_index in range(1, days_diff):
-        mid_date = prev_date + timedelta(days=day_index)
-        x.append(mid_date)
-        y.append(0)
-    x.append(curr_date)
-    value = stats_entries[index].at(value_column_index)
-    if value is None:
-      value = 1
-    y.append(value)
-    prev_date = curr_date
-  if x[0] != earliest_date:
-    x = [earliest_date] + x
-    y = [0] + y
-  return x, y
-
-def _ChartData__cluster_to_chart_line_seeds(cluster):
+def _ChartData__stats_to_chart_line_seeds(typed_entries, metadata):
   result = []
 
-  types = cluster.metadata().types()
-  types_extras = cluster.metadata().types_extras()
+  types = metadata.types()
+  types_extras = metadata.types_extras()
   values_indexes = []
-  for indx, column_type in enumerate(cluster.metadata().types()):
+  for indx, column_type in enumerate(types):
     if column_type is StatColumnType.VALUE:
       values_indexes.append(indx)
   if len(values_indexes) == 0:
-    raise ValueError('No VALUE column in cluster, can\'t produce x y data. Cluster: {}'.format(str(cluster)))
+    raise ValueError('No VALUE column in metadata, can\'t produce x y data. Metadata: {}'.format(str(metadata)))
   if len(values_indexes) > 1:
     for indx in values_indexes:
       type_extra = types_extras[indx]
       if not isinstance(type_extra, str) or len(type_extra) == 0:
         raise ValueError(('Invalid VALUE extra at index {}. '
           + 'If there\'re more than 1 value, all values extras must be not empty. '
-          + 'Cluster: {}').format(indx, str(cluster)))
+          + 'Metadata: {}').format(indx, str(metadata)))
 
-  entries = list(cluster.typed_entries())
+  entries = list(typed_entries)
   earliest_date = min([entry.date() for entry in entries])
 
   entry_id_func = lambda entry: entry.id()
@@ -74,13 +48,15 @@ def _ChartData__cluster_to_chart_line_seeds(cluster):
   return result
 
 class ChartData:
-  def __init__(self, stats_cluster, chart_appearance=None, title_base=''):
+  def __init__(self, stats_cluster, chart_modifier=None, title_base=''):
     self._lines = []
-    line_seeds = __cluster_to_chart_line_seeds(stats_cluster)
+    typed_entries, metadata = stats_cluster.typed_entries(), stats_cluster.metadata()
+    line_seeds = __stats_to_chart_line_seeds(typed_entries, metadata)
     for seed in line_seeds:
-      self._lines.append(ChartLineData(seed, chart_appearance))
-    if chart_appearance is not None:
-      self._title = '{}_{}'.format(title_base, chart_appearance.title)
+      self._lines.append(seed.grow())
+    if chart_modifier is not None:
+      self._lines = chart_modifier.convert_lines(self._lines)
+      self._title = '{}_{}'.format(title_base, chart_modifier.title)
     else:
       self._title = title_base
 
@@ -91,15 +67,10 @@ class ChartData:
     return self._title
 
 class ChartLineData:
-  def __init__(self, seed, chart_appearance):
-    self._title = seed.title
-    xcoords, ycoords = __stats_entries_to_x_y_data(seed.entries,
-                                                   seed.value_column_index,
-                                                   seed.earliest_date)
-    if chart_appearance is not None:
-      self._xcoords, self._ycoords = chart_appearance.convert_coords(xcoords, ycoords)
-    else:
-      self._xcoords, self._ycoords = xcoords, ycoords
+  def __init__(self, title, x_coords, y_coords):
+    self._title = title
+    self._xcoords = x_coords
+    self._ycoords = y_coords
 
   def title(self):
     return self._title
@@ -116,3 +87,35 @@ class _ChartLineSeed:
     self.title = title
     self.value_column_index = value_column_index
     self.earliest_date = earliest_date
+
+  def grow(self):
+    xcoords, ycoords = self.stats_entries_to_x_y_data(self.entries,
+                                                      self.value_column_index,
+                                                      self.earliest_date)
+    return ChartLineData(self.title, xcoords, ycoords)
+
+  def stats_entries_to_x_y_data(self, stats_entries, value_column_index, earliest_date):
+    if len(stats_entries) == 0:
+      return [], []
+    stats_entries = sorted(stats_entries, key=lambda entry: entry.date())
+    x = []
+    y = []
+    prev_date = earliest_date
+    for index in range(0, len(stats_entries)):
+      curr_date = stats_entries[index].date()
+      days_diff = (curr_date - prev_date).days
+      if days_diff > 1:
+        for day_index in range(1, days_diff):
+          mid_date = prev_date + timedelta(days=day_index)
+          x.append(mid_date)
+          y.append(0)
+      x.append(curr_date)
+      value = stats_entries[index].at(value_column_index)
+      if value is None:
+        value = 1
+      y.append(value)
+      prev_date = curr_date
+    if x[0] != earliest_date:
+      x = [earliest_date] + x
+      y = [0] + y
+    return x, y

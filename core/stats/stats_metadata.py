@@ -22,6 +22,7 @@ class StatsMetadata:
     return list(self._stat_column_types_extras)
 
   # YAML text converted to a Python object (list of dicts).
+  # The function always returns a copy - feel free to modify it.
   def raw_metadata(self):
     return copy.deepcopy(self._raw_metadata)
 

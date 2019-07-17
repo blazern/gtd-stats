@@ -1,4 +1,5 @@
 from core.chart.modifiers.chart_modifier import *
+from core.chart.chart_data import *
 
 class MovingAverageChartModifier(ChartModifier):
   def __init__(self, offset):
@@ -12,7 +13,14 @@ class MovingAverageChartModifier(ChartModifier):
     return MovingAverageChartModifier(offset)
 
   # Override
-  def convert_coords(self, coords_x, coords_y):
+  def convert_lines(self, lines):
+    updated_lines = []
+    for line in lines:
+      x_coords, y_coords = self._convert_coords(line.x_coords(), line.y_coords())
+      updated_lines.append(ChartLineData(line.title(), x_coords, y_coords))
+    return updated_lines
+
+  def _convert_coords(self, coords_x, coords_y):
     converted_y = []
     for indx, x in enumerate(coords_y):
       prev_y_coords = []

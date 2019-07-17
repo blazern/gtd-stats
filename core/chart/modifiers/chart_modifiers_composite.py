@@ -4,6 +4,8 @@ class ChartModifiersComposite(ChartModifier):
   def __init__(self, title, modifiers):
     types = set()
     for modifier in modifiers:
+      if modifier.multiple_modifiers_of_type_allowed():
+        continue
       if type(modifier) in types:
         raise ValueError('Can\' have more than 1 modifier of same types. Duplicating modifier: {}'.format(type(modifier)))
       types.add(type(modifier))
@@ -16,20 +18,16 @@ class ChartModifiersComposite(ChartModifier):
     return self.modifiers
 
   # Override
-  def convert_coords(self, coords_x, coords_y):
-    if len(coords_x) != len(coords_y):
-      raise ValueError('Lengths of x and y coords is different: {}, {}'.format(coords_x, coords_y))
-    converted_x = coords_x
-    converted_y = coords_y
+  def convert_lines(self, lines):
     for modifier in self._modifiers:
-      converted_x, converted_y = modifier.convert_coords(converted_x, converted_y)
-    return converted_x, converted_y
+      lines = modifier.convert_lines(lines)
+    return lines
 
   # Override
-  def convert_stats(self, stats_entries):
+  def convert_stats(self, typed_entries, metadata):
     for modifier in self._modifiers:
-      stats_entries = modifier.convert_stats(stats_entries)
-    return stats_entries
+      typed_entries, metadata = modifier.convert_stats(typed_entries, metadata)
+    return typed_entries, metadata
 
   # Override
   def title(self):

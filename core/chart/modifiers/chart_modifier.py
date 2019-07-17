@@ -1,9 +1,9 @@
 class ChartModifier:
-  def convert_coords(self, coords_x, coords_y):
-    return coords_x, coords_y
-
-  def convert_stats(self, stats_entries):
-    return stats_entries
+  def convert_lines(self, lines):
+    return lines
 
   def title(self):
     return None
+
+  def multiple_modifiers_of_type_allowed(self):
+    return False

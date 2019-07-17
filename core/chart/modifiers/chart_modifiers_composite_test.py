@@ -5,6 +5,7 @@ from datetime import datetime
 from core.chart.modifiers.chart_modifiers_composite import *
 from core.chart.modifiers.moving_average_chart_modifier import *
 from core.chart.modifiers.period_chart_modifier import *
+from core.chart.chart_data import *
 
 def str_to_date(date_str):
   return datetime.strptime(date_str, '%d/%m/%Y')
@@ -14,7 +15,13 @@ class ChartsModifiersCompositeTest(unittest.TestCase):
     modifiers_composite = ChartModifiersComposite('title', [])
     x_coords = [str_to_date('24/05/2019'), str_to_date('25/05/2019'), str_to_date('26/05/2019')]
     y_coords = [1, 2, 3]
-    converted_x, converted_y = modifiers_composite.convert_coords(x_coords, y_coords)
+    
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifiers_composite.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+    
     self.assertEqual(x_coords, converted_x)
     self.assertEqual(y_coords, converted_y)
 
@@ -24,7 +31,13 @@ class ChartsModifiersCompositeTest(unittest.TestCase):
     x_coords = [str_to_date('24/05/2019'), str_to_date('25/05/2019'), str_to_date('26/05/2019')]
     y_coords = [1, 2, 3]
     expected_converted_y = [1.0, 1.5, 2.5]
-    converted_x, converted_y = modifiers_composite.convert_coords(x_coords, y_coords)
+    
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifiers_composite.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+
     self.assertEqual(x_coords, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
@@ -42,7 +55,13 @@ class ChartsModifiersCompositeTest(unittest.TestCase):
     y_coords = [3, 6, 9, 12, 15, 18]
     expected_converted_x = ['01/2019', '02/2019', '03/2019', '04/2019', '05/2019']
     expected_converted_y = [3.0, 9.0, 10.0, 14.0, 15.0] # Without moving average would be: [3, 15, 12, 15, 18]
-    converted_x, converted_y = modifiers_composite.convert_coords(x_coords, y_coords)
+    
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifiers_composite.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
@@ -61,7 +80,13 @@ class ChartsModifiersCompositeTest(unittest.TestCase):
     y_coords = [3, 6, 9, 12, 15, 18]
     expected_converted_x = ['01/2019', '02/2019', '03/2019', '04/2019', '05/2019']
     expected_converted_y = [3.0, 10.5, 9.0, 12.0, 15.0] # Without period modifier would be: [3.0, 4.5, 6.0, 9.0, 12.0, 15.0]
-    converted_x, converted_y = modifiers_composite.convert_coords(x_coords, y_coords)
+    
+    line = ChartLineData('', x_coords, y_coords)
+    converted_lines = modifiers_composite.convert_lines([line])
+    self.assertEqual(1, len(converted_lines))
+    converted_x = converted_lines[0].x_coords()
+    converted_y = converted_lines[0].y_coords()
+
     self.assertEqual(expected_converted_x, converted_x)
     self.assertEqual(expected_converted_y, converted_y)
 
@@ -74,3 +99,31 @@ class ChartsModifiersCompositeTest(unittest.TestCase):
     except:
       exception_caught = True
     self.assertTrue(exception_caught)
+
+  def test_composite_accepts_2_modifiers_of_same_type_if_they_are_ok_with_it(self):
+    class ChillModifier(ChartModifier):
+      # Override
+      def multiple_modifiers_of_type_allowed(self):
+        return True
+
+    modifier1 = ChillModifier()
+    modifier2 = ChillModifier()
+    exception_caught = False
+    try:
+      modifiers_composite = ChartModifiersComposite('title', [modifier1, modifier2])
+    except:
+      exception_caught = True
+    self.assertFalse(exception_caught)
+
+  def test_composite_changes_number_of_lines_when_modifiers_do(self):
+    class DoubleLineModifier(ChartModifier):
+      # Override
+      def convert_lines(self, lines):
+        return lines + lines
+
+    x_coords = [str_to_date('24/05/2019'), str_to_date('25/05/2019'), str_to_date('26/05/2019')]
+    y_coords = [1, 2, 3]
+    line = ChartLineData('', x_coords, y_coords)
+
+    modifiers_composite = ChartModifiersComposite('title', [DoubleLineModifier()])
+    self.assertEqual(2, len(modifiers_composite.convert_lines([line])))
