@@ -3,13 +3,17 @@ from core.chart.modifiers.moving_average_chart_modifier import *
 from core.chart.modifiers.period_chart_modifier import *
 from core.chart.modifiers.values_sum_chart_modifier import *
 from core.chart.modifiers.values_multiplier_chart_modifier import *
+from core.chart.modifiers.date_basis_chart_modifier import *
+from core.chart.modifiers.erase_zero_values_chart_modifier import *
 
 def extract_chart_modifiers_from_stats_metadata(metadata):
   modifiers_fabrics = [
     lambda metadata_dict: MovingAverageChartModifier.try_create_from(metadata_dict),
     lambda metadata_dict: PeriodChartModifier.try_create_from(metadata_dict),
     lambda metadata_dict: ValuesSumChartModifier.try_create_from(metadata_dict),
-    lambda metadata_dict: ValuesMultiplierChartModifier.try_create_from(metadata_dict)
+    lambda metadata_dict: ValuesMultiplierChartModifier.try_create_from(metadata_dict),
+    lambda metadata_dict: DateBasisChartModifier.try_create_from(metadata_dict),
+    lambda metadata_dict: EraseZeroValuesChartModifier.try_create_from(metadata_dict)
   ]
 
   raw_metadata = metadata.raw_metadata()
