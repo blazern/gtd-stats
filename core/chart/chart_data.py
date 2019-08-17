@@ -15,8 +15,6 @@ def _ChartData__stats_to_chart_line_seeds(typed_entries, metadata):
   for indx, column_type in enumerate(types):
     if column_type is StatColumnType.VALUE:
       values_indexes.append(indx)
-  if len(values_indexes) == 0:
-    raise ValueError('No VALUE column in metadata, can\'t produce x y data. Metadata: {}'.format(str(metadata)))
   if len(values_indexes) > 1:
     for indx in values_indexes:
       type_extra = types_extras[indx]
@@ -33,18 +31,24 @@ def _ChartData__stats_to_chart_line_seeds(typed_entries, metadata):
     entries = sorted(entries, key=entry_id_func)
   for entries_group_id, entries_group in groupby(entries, entry_id_func):
     entries_group = list(entries_group)
-    for indx in values_indexes:
-      if types_extras[indx] is None and entries_group_id is None:
-        title = ''
-      elif types_extras[indx] is None and entries_group_id is not None:
-        title = entries_group_id
-      elif types_extras[indx] is not None and entries_group_id is None:
-        title = types_extras[indx]
-      elif types_extras[indx] is not None and entries_group_id is not None:
-        title = '{}_{}'.format(entries_group_id, types_extras[indx])
-      else:
-        raise ValueError('Invalid state')
-      result.append(_ChartLineSeed(entries_group, title, indx, earliest_date))
+    if len(values_indexes) > 0:
+      for indx in values_indexes:
+        if types_extras[indx] is None and entries_group_id is None:
+          title = ''
+        elif types_extras[indx] is None and entries_group_id is not None:
+          title = entries_group_id
+        elif types_extras[indx] is not None and entries_group_id is None:
+          title = types_extras[indx]
+        elif types_extras[indx] is not None and entries_group_id is not None:
+          title = '{}_{}'.format(entries_group_id, types_extras[indx])
+        else:
+          raise ValueError('Invalid state')
+        result.append(_ChartLineSeed(entries_group, title, indx, earliest_date))
+    else:
+      title = entries_group_id
+      if title is None:
+        title = 'value'
+      result.append(_ChartLineSeed(entries_group, title, None, earliest_date))
   return result
 
 class ChartData:
@@ -110,8 +114,9 @@ class _ChartLineSeed:
           x.append(mid_date)
           y.append(0)
       x.append(curr_date)
-      value = stats_entries[index].at(value_column_index)
-      if value is None:
+      if value_column_index is not None:
+        value = stats_entries[index].at(value_column_index)
+      else:
         value = 1
       y.append(value)
       prev_date = curr_date
