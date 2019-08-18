@@ -1,5 +1,6 @@
 from core.stats.stats_entry import StatsEntry
 
+from collections import OrderedDict
 from datetime import timedelta
 from itertools import *
 
@@ -123,4 +124,19 @@ class _ChartLineSeed:
     if x[0] != earliest_date:
       x = [earliest_date] + x
       y = [0] + y
+
+    x, y = self.merge_values_with_same_x(x, y)
     return x, y
+
+  def merge_values_with_same_x(self, x, y):
+    merging_coods = OrderedDict()
+    for indx in range(0, len(x)):
+      if x[indx] not in merging_coods:
+        merging_coods[x[indx]] = 0
+      merging_coods[x[indx]] += y[indx]
+    x_final = []
+    y_final = []
+    for x_key, y_val in merging_coods.items():
+      x_final.append(x_key)
+      y_final.append(y_val)
+    return x_final, y_final

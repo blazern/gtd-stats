@@ -197,6 +197,55 @@ class ChartDataTest(unittest.TestCase):
     self.assertEqual(3, lines_dict['kiril'].y_coords()[1])
     self.assertEqual(3, lines_dict['kiril'].y_coords()[2])
 
+  def test_can_use_stats_without_values(self):
+    cluster = StatsCluster.from_str('''
+      date;id
+      18/05/2019;danil
+      18/05/2019;danil
+      19/05/2019;danil
+      18/05/2019;kiril
+      ''')
+   
+    chart_data = ChartData(cluster)
+    lines = chart_data.lines()
+    self.assertEqual(2, len(lines))
+    
+    lines_dict = lines_to_lines_dict(lines)
+    self.assertTrue('danil' in lines_dict)
+    self.assertTrue('kiril' in lines_dict)
+
+    self.assertEqual(2, len(lines_dict['danil'].x_coords()))
+    self.assertEqual(2, len(lines_dict['danil'].y_coords()))
+    self.assertEqual(str_to_date('18/05/2019'), lines_dict['danil'].x_coords()[0])
+    self.assertEqual(str_to_date('19/05/2019'), lines_dict['danil'].x_coords()[1])
+    self.assertEqual(2, lines_dict['danil'].y_coords()[0])
+    self.assertEqual(1, lines_dict['danil'].y_coords()[1])
+
+    self.assertEqual(1, len(lines_dict['kiril'].x_coords()))
+    self.assertEqual(1, len(lines_dict['kiril'].y_coords()))
+    self.assertEqual(str_to_date('18/05/2019'), lines_dict['kiril'].x_coords()[0])
+    self.assertEqual(1, lines_dict['kiril'].y_coords()[0])
+
+  def test_can_use_stats_without_values_and_ids(self):
+    cluster = StatsCluster.from_str('''
+      date
+      18/05/2019
+      18/05/2019
+      19/05/2019
+      18/05/2019
+      ''')
+   
+    chart_data = ChartData(cluster)
+    lines = chart_data.lines()
+    self.assertEqual(1, len(lines))
+    
+    self.assertEqual(2, len(lines[0].x_coords()))
+    self.assertEqual(2, len(lines[0].y_coords()))
+    self.assertEqual(str_to_date('18/05/2019'), lines[0].x_coords()[0])
+    self.assertEqual(str_to_date('19/05/2019'), lines[0].x_coords()[1])
+    self.assertEqual(3, lines[0].y_coords()[0])
+    self.assertEqual(1, lines[0].y_coords()[1])
+
   def test_uses_passed_title(self):
     cluster = StatsCluster.from_str('''
       date;value;id
