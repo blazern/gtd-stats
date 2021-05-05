@@ -12,7 +12,7 @@ def load_from(file_path):
   with open(file_path, 'r') as text_file:
     text = text_file.read()
 
-  if len(text) is 0:
+  if len(text) == 0:
     return None
   return StatsCluster.from_str(text)
 
