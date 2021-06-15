@@ -53,6 +53,8 @@ def main(argv):
   messages_by_author = {}
   for message in messages:
     author = message['author']
+    if not author:
+      continue
     date = message['date']
     authors.add(author)
     if author not in messages_by_author:
